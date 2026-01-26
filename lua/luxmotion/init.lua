@@ -1,55 +1,54 @@
 local config = require("luxmotion.config")
-local cursor_keymaps = require("luxmotion.cursor.keymaps")
-local scroll_keymaps = require("luxmotion.scroll.keymaps")
-local experimental_keymaps = require("luxmotion.experimental.keymaps")
+local builtin = require("luxmotion.registry.builtin")
+local keymaps = require("luxmotion.registry.keymaps")
+local traits = require("luxmotion.registry.traits")
+local motions = require("luxmotion.registry.motions")
+local loop = require("luxmotion.engine.loop")
 
 local M = {}
 
+local initialized = false
+
 function M.setup(user_config)
+  if initialized then
+    M.reset()
+  end
+
   config.validate(user_config)
   config.update(user_config)
-  
-  -- Initialize performance monitoring
+
   local performance = require("luxmotion.performance")
   performance.setup()
-  
-  local keymap_config = config.get_keymaps()
-  
-  if keymap_config.cursor then
-    cursor_keymaps.setup_keymaps()
-  end
-  
-  if keymap_config.scroll then
-    scroll_keymaps.setup_keymaps()
-  end
-  
-  if keymap_config.experimental then
-    experimental_keymaps.setup_keymaps()
-  end
+
+  builtin.register_all()
+  keymaps.setup()
+
+  initialized = true
+end
+
+function M.reset()
+  keymaps.clear()
+  loop.stop_all()
+  traits.clear()
+  motions.clear()
+  initialized = false
 end
 
 function M.enable()
-  local current_config = config.get()
-  config.update({
-    cursor = { enabled = true },
-    scroll = { enabled = true }
-  })
+  local cfg = config.get()
+  cfg.cursor.enabled = true
+  cfg.scroll.enabled = true
 end
 
 function M.disable()
-  local current_config = config.get()
-  config.update({
-    cursor = { enabled = false },
-    scroll = { enabled = false }
-  })
+  local cfg = config.get()
+  cfg.cursor.enabled = false
+  cfg.scroll.enabled = false
 end
 
 function M.toggle()
-  local current_config = config.get()
-  local cursor_enabled = current_config.cursor.enabled
-  local scroll_enabled = current_config.scroll.enabled
-  
-  if cursor_enabled or scroll_enabled then
+  local cfg = config.get()
+  if cfg.cursor.enabled or cfg.scroll.enabled then
     M.disable()
   else
     M.enable()
@@ -57,27 +56,19 @@ function M.toggle()
 end
 
 function M.enable_cursor()
-  config.update({ cursor = { enabled = true } })
+  config.get().cursor.enabled = true
 end
 
 function M.disable_cursor()
-  config.update({ cursor = { enabled = false } })
+  config.get().cursor.enabled = false
 end
 
 function M.enable_scroll()
-  config.update({ scroll = { enabled = true } })
+  config.get().scroll.enabled = true
 end
 
 function M.disable_scroll()
-  config.update({ scroll = { enabled = false } })
-end
-
-function M.move_smooth(direction, count)
-  cursor_keymaps.smooth_move(direction, count)
-end
-
-function M.scroll_smooth(command, count)
-  scroll_keymaps.smooth_scroll(command, count)
+  config.get().scroll.enabled = false
 end
 
 function M.toggle_performance()
