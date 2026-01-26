@@ -25,10 +25,16 @@ function M.execute(motion_id, input)
     return
   end
 
+  local dominated = false
   for _, trait_id in ipairs(motion.traits) do
     if traits.is_animating(trait_id) then
-      return
+      dominated = true
+      traits.set_animating(trait_id, false)
     end
+  end
+
+  if dominated then
+    loop.stop_all()
   end
 
   local context = context_builder.build(input)

@@ -4,7 +4,10 @@ local M = {}
 
 local current_config = vim.deepcopy(defaults.config)
 
-function M.get()
+function M.get(category)
+  if category then
+    return current_config[category]
+  end
   return current_config
 end
 
