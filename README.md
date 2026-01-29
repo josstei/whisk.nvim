@@ -65,6 +65,13 @@ Combines smooth **cursor movement**, **word navigation**, **text objects**, and 
 
 ---
 
+## Documentation
+
+- [Usage](docs/USAGE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+
+---
+
 ## 📦 Installation
 
 ### **Using lazy.nvim**
