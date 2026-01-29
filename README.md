@@ -184,13 +184,25 @@ performance.disable()
 performance.toggle()
 performance.is_active()
 
--- Manual motion (if custom keymaps are used)
-local cursor_keymaps = require("luxmotion.cursor.keymaps")
-cursor_keymaps.smooth_move("j", 5)
-cursor_keymaps.smooth_word_move("w", 3)
-cursor_keymaps.smooth_find_move("f", "x", 2)
-cursor_keymaps.smooth_text_object_move("}", 1)
+-- Manual motion execution (for custom keymaps)
+local orchestrator = require("luxmotion.engine.orchestrator")
+orchestrator.execute("basic_j", { count = 5, direction = "j" })
+orchestrator.execute("word_w", { count = 3, direction = "w" })
+orchestrator.execute("find_f", { char = "x", count = 2, direction = "f" })
+orchestrator.execute("text_object_}", { count = 1, direction = "}" })
 ```
+
+### Available Motion IDs
+
+| Category | Motion IDs |
+|----------|------------|
+| Basic | `basic_h`, `basic_j`, `basic_k`, `basic_l`, `basic_0`, `basic_$` |
+| Word | `word_w`, `word_b`, `word_e`, `word_W`, `word_B`, `word_E` |
+| Find | `find_f`, `find_F`, `find_t`, `find_T` |
+| Text Object | `text_object_{`, `text_object_}`, `text_object_(`, `text_object_)`, `text_object_%` |
+| Line | `line_gg`, `line_G`, `line_\|` |
+| Search | `search_n`, `search_N`, `screen_gj`, `screen_gk` |
+| Scroll | `scroll_ctrl_d`, `scroll_ctrl_u`, `scroll_ctrl_f`, `scroll_ctrl_b`, `position_zz`, `position_zt`, `position_zb` |
 
 ---
 
@@ -206,9 +218,9 @@ require("luxmotion").setup({
 })
 
 -- Define your own
-local cursor_keymaps = require("luxmotion.cursor.keymaps")
+local orchestrator = require("luxmotion.engine.orchestrator")
 vim.keymap.set("n", "j", function()
-  cursor_keymaps.smooth_move("j", vim.v.count1)
+  orchestrator.execute("basic_j", { count = vim.v.count1, direction = "j" })
 end)
 ```
 
