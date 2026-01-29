@@ -22,7 +22,7 @@ describe('config/validation', function()
     local config = {
       cursor = { duration = 250, easing = 'ease-out', enabled = true },
       scroll = { duration = 400, easing = 'linear', enabled = false },
-      keymaps = { cursor = true, scroll = false, experimental = true },
+      keymaps = { cursor = true, scroll = false },
     }
     assert.does_not_throw(function()
       validation.validate_config(config)
@@ -167,20 +167,11 @@ describe('config/validation', function()
     end, 'scroll')
   end)
 
-  it('rejects non-boolean keymaps.experimental', function()
-    local config = {
-      keymaps = { experimental = 'yes' },
-    }
-    assert.throws(function()
-      validation.validate_config(config)
-    end, 'experimental')
-  end)
-
   it('accepts boolean false values', function()
     local config = {
       cursor = { enabled = false },
       scroll = { enabled = false },
-      keymaps = { cursor = false, scroll = false, experimental = false },
+      keymaps = { cursor = false, scroll = false },
     }
     assert.does_not_throw(function()
       validation.validate_config(config)

@@ -42,7 +42,6 @@ require('tests.unit.performance_spec')
 
 require('tests.unit.shims.cursor_keymaps_spec')
 require('tests.unit.shims.scroll_keymaps_spec')
-require('tests.unit.shims.experimental_spec')
 
 require('tests.unit.init_spec')
 

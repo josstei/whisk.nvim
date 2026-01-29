@@ -54,7 +54,6 @@ describe('config (router)', function()
     local keymaps = config.get_keymaps()
     assert.equals(keymaps.cursor, true)
     assert.equals(keymaps.scroll, true)
-    assert.equals(keymaps.experimental, false)
   end)
 
   it('get_performance delegates to management', function()
@@ -96,13 +95,13 @@ describe('config (router)', function()
     config.update({
       cursor = { duration = 500, easing = 'linear' },
       scroll = { enabled = false },
-      keymaps = { experimental = true },
+      keymaps = { cursor = false },
     })
 
     assert.equals(config.get_cursor().duration, 500)
     assert.equals(config.get_cursor().easing, 'linear')
     assert.equals(config.get_scroll().enabled, false)
-    assert.equals(config.get_keymaps().experimental, true)
+    assert.equals(config.get_keymaps().cursor, false)
   end)
 
   it('validate throws for invalid easing', function()

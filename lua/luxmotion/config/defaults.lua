@@ -14,7 +14,6 @@ M.config = {
   keymaps = {
     cursor = true,
     scroll = true,
-    experimental = false,
   },
   performance = {
     enabled = false,

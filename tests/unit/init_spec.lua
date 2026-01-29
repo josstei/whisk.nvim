@@ -76,7 +76,7 @@ describe('init (main module)', function()
       luxmotion.setup({
         cursor = { duration = 200, easing = 'linear', enabled = true },
         scroll = { duration = 300, easing = 'ease-in', enabled = false },
-        keymaps = { cursor = true, scroll = false, experimental = false },
+        keymaps = { cursor = true, scroll = false },
         performance = { enabled = false },
       })
     end)
