@@ -38,7 +38,7 @@ Combines smooth **cursor movement**, **word navigation**, **text objects**, and 
 - **Flexible Configuration**
   - Separate settings for **cursor** and **scroll** animations:
     - Duration (ms)
-    - Easing function (`linear`, `ease-out`, `ease-out-quad`)
+    - Easing function (`linear`, `ease-in`, `ease-out`, `ease-in-out`)
     - Enable/disable individually
   - **Keymap control**:
     - Enable/disable default mappings
@@ -74,13 +74,13 @@ Combines smooth **cursor movement**, **word navigation**, **text objects**, and 
   config = function()
     require("luxmotion").setup({
       cursor = {
-        duration = 250,
+        duration = 150,
         easing = "ease-out",
         enabled = true,
       },
       scroll = {
-        duration = 400,
-        easing = "ease-out",
+        duration = 240,
+        easing = "ease-in-out",
         enabled = true,
       },
       performance = { enabled = false },
@@ -122,13 +122,13 @@ EOF
 ```lua
 require("luxmotion").setup({
   cursor = {
-    duration = 250,       -- Cursor animation duration (ms)
+    duration = 150,       -- Cursor animation duration (ms)
     easing = "ease-out",  -- Cursor easing function
     enabled = true,
   },
   scroll = {
-    duration = 400,       -- Scroll animation duration (ms)
-    easing = "ease-out",  -- Scroll easing function
+    duration = 240,       -- Scroll animation duration (ms)
+    easing = "ease-in-out",  -- Scroll easing function
     enabled = true,
   },
   performance = {
