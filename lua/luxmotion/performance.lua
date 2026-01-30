@@ -1,5 +1,4 @@
 local config = require("luxmotion.config")
-local buffer_utils = require("luxmotion.utils.buffer")
 
 local M = {}
 
@@ -18,7 +17,7 @@ function M.should_auto_enable()
     return false
   end
   
-  local line_count = buffer_utils.get_line_count()
+  local line_count = vim.api.nvim_buf_line_count(0)
   return line_count > perf_config.large_file_threshold
 end
 

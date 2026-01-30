@@ -48,10 +48,6 @@ function M.validate_config(config)
     if config.keymaps.scroll and type(config.keymaps.scroll) ~= "boolean" then
       error("keymaps.scroll must be a boolean")
     end
-    
-    if config.keymaps.experimental and type(config.keymaps.experimental) ~= "boolean" then
-      error("keymaps.experimental must be a boolean")
-    end
   end
   
   return true
