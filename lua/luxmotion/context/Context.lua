@@ -44,4 +44,21 @@ function Context:get_line_length(line_num)
   return #lines[1]
 end
 
+function Context:clamp_line(line)
+  local line_count = self:get_line_count()
+  return math.max(1, math.min(line, line_count))
+end
+
+function Context:clamp_column(col, line)
+  local line_length = self:get_line_length(line)
+  local max_col = math.max(line_length - 1, 0)
+  return math.max(0, math.min(col, max_col))
+end
+
+function Context:clamp_position(line, col)
+  local clamped_line = self:clamp_line(line)
+  local clamped_col = self:clamp_column(col, clamped_line)
+  return clamped_line, clamped_col
+end
+
 return Context
