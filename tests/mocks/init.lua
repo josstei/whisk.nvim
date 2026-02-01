@@ -104,4 +104,16 @@ function M.clear_package_cache()
   end
 end
 
+function M.delete_buffer(bufnr)
+  vim_api.delete_buffer(bufnr)
+end
+
+function M.close_window(winid)
+  vim_api.close_window(winid)
+end
+
+function M.set_window_buffer(winid, bufnr)
+  vim_api.set_window_buffer(winid, bufnr)
+end
+
 return M

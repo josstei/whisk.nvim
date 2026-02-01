@@ -7,6 +7,11 @@ local state = {
   buffer_lines = { "line 1", "line 2", "line 3" },
   autocmds = {},
   autocmd_id = 0,
+  deleted_buffers = {},
+  closed_windows = {},
+  window_buffers = {},
+  augroups = {},
+  augroup_id = 0,
 }
 
 function M.reset()
@@ -17,6 +22,11 @@ function M.reset()
     buffer_lines = { "line 1", "line 2", "line 3" },
     autocmds = {},
     autocmd_id = 0,
+    deleted_buffers = {},
+    closed_windows = {},
+    window_buffers = {},
+    augroups = {},
+    augroup_id = 0,
   }
 end
 
@@ -39,6 +49,18 @@ end
 function M.set_window_size(height, width)
   state.window_height = height
   state.window_width = width
+end
+
+function M.delete_buffer(bufnr)
+  state.deleted_buffers[bufnr] = true
+end
+
+function M.close_window(winid)
+  state.closed_windows[winid] = true
+end
+
+function M.set_window_buffer(winid, bufnr)
+  state.window_buffers[winid] = bufnr
 end
 
 function M.create()
@@ -122,6 +144,31 @@ function M.create()
 
     nvim_get_current_line = function()
       return state.buffer_lines[state.cursor[1]] or ""
+    end,
+
+    nvim_buf_is_valid = function(bufnr)
+      return not state.deleted_buffers[bufnr]
+    end,
+
+    nvim_win_is_valid = function(winid)
+      return not state.closed_windows[winid]
+    end,
+
+    nvim_win_get_buf = function(winid)
+      return state.window_buffers[winid] or 1
+    end,
+
+    nvim_win_call = function(winid, func)
+      return func()
+    end,
+
+    nvim_del_augroup_by_id = function(id)
+      state.augroups[id] = nil
+      for i = #state.autocmds, 1, -1 do
+        if state.autocmds[i].group == id then
+          table.remove(state.autocmds, i)
+        end
+      end
     end,
   }
 end
