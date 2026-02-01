@@ -32,4 +32,16 @@ function Context:is_valid()
   return true, nil
 end
 
+function Context:get_line_count()
+  return vim.api.nvim_buf_line_count(self.bufnr)
+end
+
+function Context:get_line_length(line_num)
+  local lines = vim.api.nvim_buf_get_lines(self.bufnr, line_num - 1, line_num, false)
+  if not lines or not lines[1] then
+    return 0
+  end
+  return #lines[1]
+end
+
 return Context
