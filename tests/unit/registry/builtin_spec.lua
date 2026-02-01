@@ -176,31 +176,77 @@ describe('registry/builtin', function()
     end
   end)
 
-  it('cursor trait apply function works', function()
+  it('cursor trait apply function works with Context', function()
     builtin.register_traits()
     mocks.set_buffer_content({ "line1", "line2", "line3", "line4", "line5" })
     mocks.set_cursor(1, 0)
+    mocks.set_topline(1)
+    mocks.set_window_size(40, 120)
 
     local cursor_trait = traits.get('cursor')
-    local context = { cursor = { line = 1, col = 0 } }
+    local Context = require('luxmotion.context.Context')
+    local ctx = Context.new(1, 1000)
+    ctx.cursor = { line = 1, col = 0 }
+
     local result = { cursor = { line = 5, col = 3 } }
 
-    cursor_trait.apply(context, result, 1.0)
+    cursor_trait.apply(ctx, result, 1.0)
 
     local new_cursor = mocks.get_cursor()
     assert.equals(new_cursor[1], 5)
     assert.equals(new_cursor[2], 3)
   end)
 
-  it('scroll trait apply function works', function()
+  it('scroll trait apply function works with Context', function()
     builtin.register_traits()
+    mocks.set_buffer_content({ "line1", "line2", "line3", "line4", "line5" })
+    mocks.set_cursor(1, 0)
+    mocks.set_topline(1)
+    mocks.set_window_size(40, 120)
 
     local scroll_trait = traits.get('scroll')
-    local context = { viewport = { topline = 1 }, cursor = { line = 1, col = 0 } }
-    local result = { viewport = { topline = 10 }, cursor = { line = 15, col = 0 } }
+    local Context = require('luxmotion.context.Context')
+    local ctx = Context.new(1, 1000)
+    ctx.viewport = { topline = 1 }
+
+    local result = { viewport = { topline = 3 }, cursor = { line = 3, col = 0 } }
 
     assert.does_not_throw(function()
-      scroll_trait.apply(context, result, 1.0)
+      scroll_trait.apply(ctx, result, 1.0)
     end)
+  end)
+
+  it('cursor trait does not crash without context methods', function()
+    builtin.register_traits()
+
+    local cursor_trait = traits.get('cursor')
+    local plain_context = { cursor = { line = 1, col = 0 } }
+    local result = { cursor = { line = 5, col = 3 } }
+
+    assert.does_not_throw(function()
+      cursor_trait.apply(plain_context, result, 1.0)
+    end)
+  end)
+
+  it('cursor trait does not set cursor when context is invalid', function()
+    builtin.register_traits()
+    mocks.set_buffer_content({ "line1", "line2", "line3", "line4", "line5" })
+    mocks.set_cursor(1, 0)
+    mocks.set_topline(1)
+    mocks.set_window_size(40, 120)
+
+    local cursor_trait = traits.get('cursor')
+    local Context = require('luxmotion.context.Context')
+    local ctx = Context.new(1, 1000)
+    ctx.cursor = { line = 1, col = 0 }
+
+    mocks.delete_buffer(1)
+
+    local result = { cursor = { line = 5, col = 3 } }
+    cursor_trait.apply(ctx, result, 1.0)
+
+    local new_cursor = mocks.get_cursor()
+    assert.equals(new_cursor[1], 1)
+    assert.equals(new_cursor[2], 0)
   end)
 end)

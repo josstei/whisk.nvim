@@ -1,7 +1,6 @@
 local traits = require("luxmotion.registry.traits")
 local motions = require("luxmotion.registry.motions")
 local calculators = require("luxmotion.calculators")
-local viewport = require("luxmotion.core.viewport")
 
 local M = {}
 
@@ -9,8 +8,8 @@ function M.register_traits()
   traits.register({
     id = "cursor",
     apply = function(context, result, progress)
-      if result.cursor then
-        viewport.set_cursor_position(result.cursor.line, result.cursor.col)
+      if result.cursor and context.set_cursor then
+        context:set_cursor(result.cursor.line, result.cursor.col)
       end
     end,
   })
@@ -18,8 +17,8 @@ function M.register_traits()
   traits.register({
     id = "scroll",
     apply = function(context, result, progress)
-      if result.viewport and result.viewport.topline then
-        viewport.restore_view(result.viewport.topline, result.cursor.line, result.cursor.col)
+      if result.viewport and result.viewport.topline and context.restore_view then
+        context:restore_view(result.viewport.topline, result.cursor.line, result.cursor.col)
       end
     end,
   })
