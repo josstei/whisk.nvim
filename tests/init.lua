@@ -22,6 +22,7 @@ require('tests.unit.context.Context_spec')
 
 require('tests.unit.engine.pool_spec')
 require('tests.unit.engine.loop_spec')
+require('tests.unit.engine.lifecycle_spec')
 require('tests.unit.engine.orchestrator_spec')
 
 require('tests.unit.registry.motions_spec')

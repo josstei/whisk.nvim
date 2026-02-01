@@ -109,4 +109,10 @@ function M.is_running()
   return is_running
 end
 
+function M.cancel_for_buffer(bufnr)
+end
+
+function M.cancel_for_window(winid)
+end
+
 return M
