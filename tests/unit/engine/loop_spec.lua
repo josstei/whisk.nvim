@@ -186,4 +186,116 @@ describe('engine/loop', function()
       end,
     })
   end)
+
+  it('exports cancel_for_buffer function', function()
+    assert.is_type(loop.cancel_for_buffer, 'function')
+  end)
+
+  it('exports cancel_for_window function', function()
+    assert.is_type(loop.cancel_for_window, 'function')
+  end)
+
+  it('exports force_process_frame function', function()
+    assert.is_type(loop.force_process_frame, 'function')
+  end)
+
+  it('cancel_for_buffer removes animations for specified buffer', function()
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 1, winid = 1000, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+    })
+
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 2, winid = 1001, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+    })
+
+    assert.equals(loop.get_active_count(), 2)
+    loop.cancel_for_buffer(1)
+    assert.equals(loop.get_active_count(), 1)
+  end)
+
+  it('cancel_for_window removes animations for specified window', function()
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 1, winid = 1000, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+    })
+
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 1, winid = 1001, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+    })
+
+    assert.equals(loop.get_active_count(), 2)
+    loop.cancel_for_window(1000)
+    assert.equals(loop.get_active_count(), 1)
+  end)
+
+  it('cancel_for_buffer calls on_cancel callback', function()
+    local cancelled = false
+    local cancel_reason = nil
+
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 1, winid = 1000, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+      on_cancel = function(reason)
+        cancelled = true
+        cancel_reason = reason
+      end,
+    })
+
+    loop.cancel_for_buffer(1)
+    assert.is_true(cancelled)
+    assert.equals(cancel_reason, 'buffer_invalidated')
+  end)
+
+  it('cancel_for_window calls on_cancel callback', function()
+    local cancelled = false
+    local cancel_reason = nil
+
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 1, winid = 1000, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+      on_cancel = function(reason)
+        cancelled = true
+        cancel_reason = reason
+      end,
+    })
+
+    loop.cancel_for_window(1000)
+    assert.is_true(cancelled)
+    assert.equals(cancel_reason, 'window_invalidated')
+  end)
+
+  it('cancel_for_buffer sets is_running to false when no animations remain', function()
+    loop.start({
+      duration = 100,
+      easing = 'linear',
+      context = { bufnr = 1, winid = 1000, cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+    })
+
+    assert.is_true(loop.is_running())
+    loop.cancel_for_buffer(1)
+    assert.is_false(loop.is_running())
+  end)
 end)

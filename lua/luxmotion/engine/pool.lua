@@ -17,6 +17,7 @@ function M.acquire()
       result = nil,
       traits = nil,
       on_complete = nil,
+      on_cancel = nil,
     }
   end
 end
@@ -30,6 +31,7 @@ function M.release(animation)
     animation.result = nil
     animation.traits = nil
     animation.on_complete = nil
+    animation.on_cancel = nil
     pool_size = pool_size + 1
     table.insert(animation_pool, animation)
   end

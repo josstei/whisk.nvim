@@ -45,6 +45,19 @@ local function process_frame()
 
   for i = #frame_queue, 1, -1 do
     local anim = frame_queue[i]
+
+    if anim.context.is_valid then
+      local valid, reason = anim.context:is_valid()
+      if not valid then
+        if anim.on_cancel then
+          anim.on_cancel(reason)
+        end
+        table.remove(frame_queue, i)
+        pool.release(anim)
+        goto continue
+      end
+    end
+
     local elapsed = current_time - anim.start_time
     local progress = math.min(elapsed / anim.duration_ns, 1.0)
     local eased = anim.easing_fn(progress)
@@ -62,6 +75,8 @@ local function process_frame()
       table.remove(frame_queue, i)
       pool.release(anim)
     end
+
+    ::continue::
   end
 
   if #frame_queue > 0 then
@@ -84,6 +99,7 @@ function M.start(options)
   anim.result = options.result
   anim.traits = options.traits
   anim.on_complete = options.on_complete
+  anim.on_cancel = options.on_cancel
 
   table.insert(frame_queue, anim)
 
@@ -101,6 +117,40 @@ function M.stop_all()
   is_running = false
 end
 
+function M.cancel_for_buffer(bufnr)
+  for i = #frame_queue, 1, -1 do
+    local anim = frame_queue[i]
+    if anim.context.bufnr == bufnr then
+      if anim.on_cancel then
+        anim.on_cancel('buffer_invalidated')
+      end
+      pool.release(anim)
+      table.remove(frame_queue, i)
+    end
+  end
+
+  if #frame_queue == 0 then
+    is_running = false
+  end
+end
+
+function M.cancel_for_window(winid)
+  for i = #frame_queue, 1, -1 do
+    local anim = frame_queue[i]
+    if anim.context.winid == winid then
+      if anim.on_cancel then
+        anim.on_cancel('window_invalidated')
+      end
+      pool.release(anim)
+      table.remove(frame_queue, i)
+    end
+  end
+
+  if #frame_queue == 0 then
+    is_running = false
+  end
+end
+
 function M.get_active_count()
   return #frame_queue
 end
@@ -109,10 +159,10 @@ function M.is_running()
   return is_running
 end
 
-function M.cancel_for_buffer(bufnr)
-end
-
-function M.cancel_for_window(winid)
+function M.force_process_frame()
+  if #frame_queue > 0 then
+    process_frame()
+  end
 end
 
 return M
