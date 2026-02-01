@@ -4,6 +4,7 @@ local keymaps = require("luxmotion.registry.keymaps")
 local traits = require("luxmotion.registry.traits")
 local motions = require("luxmotion.registry.motions")
 local loop = require("luxmotion.engine.loop")
+local lifecycle = require("luxmotion.engine.lifecycle")
 
 local M = {}
 
@@ -22,6 +23,7 @@ function M.setup(user_config)
 
   builtin.register_all()
   keymaps.setup()
+  lifecycle.setup()
 
   initialized = true
 end
@@ -31,6 +33,7 @@ function M.reset()
   loop.stop_all()
   traits.clear()
   motions.clear()
+  lifecycle.teardown()
   initialized = false
 end
 
