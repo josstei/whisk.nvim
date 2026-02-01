@@ -61,4 +61,35 @@ function Context:clamp_position(line, col)
   return clamped_line, clamped_col
 end
 
+function Context:set_cursor(line, col)
+  local valid, reason = self:is_valid()
+  if not valid then
+    return false, reason
+  end
+
+  local clamped_line, clamped_col = self:clamp_position(line, col)
+  vim.api.nvim_win_set_cursor(self.winid, { clamped_line, clamped_col })
+  return true
+end
+
+function Context:restore_view(topline, line, col)
+  local valid, reason = self:is_valid()
+  if not valid then
+    return false, reason
+  end
+
+  local clamped_line, clamped_col = self:clamp_position(line, col)
+  local clamped_topline = self:clamp_line(topline)
+
+  vim.api.nvim_win_call(self.winid, function()
+    vim.fn.winrestview({
+      topline = clamped_topline,
+      lnum = clamped_line,
+      col = clamped_col,
+      leftcol = 0,
+    })
+  end)
+  return true
+end
+
 return Context
