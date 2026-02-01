@@ -98,11 +98,11 @@ function M.create()
     end,
 
     nvim_get_current_buf = function()
-      return 0
+      return 1
     end,
 
     nvim_get_current_win = function()
-      return 0
+      return 1000
     end,
 
     nvim_create_autocmd = function(events, opts)

@@ -47,6 +47,8 @@ require('tests.unit.shims.scroll_keymaps_spec')
 
 require('tests.unit.init_spec')
 
+require('tests.integration.context_lifecycle_spec')
+
 local success = runner.run()
 
 mocks.teardown()
