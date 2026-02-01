@@ -147,6 +147,17 @@ function M.create()
     screencol = function()
       return get_api_state().cursor[2] + 1
     end,
+
+    getwininfo = function(winid)
+      return {{
+        winid = winid or 1000,
+        bufnr = 1,
+        topline = state.topline,
+        botline = state.topline + get_api_state().window_height - 1,
+        height = get_api_state().window_height,
+        width = get_api_state().window_width,
+      }}
+    end,
   }
 end
 

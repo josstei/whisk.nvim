@@ -18,6 +18,7 @@ require('tests.unit.config_spec')
 require('tests.unit.core.viewport_spec')
 
 require('tests.unit.context.builder_spec')
+require('tests.unit.context.Context_spec')
 
 require('tests.unit.engine.pool_spec')
 require('tests.unit.engine.loop_spec')
