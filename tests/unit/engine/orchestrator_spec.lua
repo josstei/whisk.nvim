@@ -36,10 +36,9 @@ describe('engine/orchestrator', function()
     traits.register({
       id = 'cursor',
       apply = function(context, result, progress)
-        local viewport = require('luxmotion.core.viewport')
-        local line = math.floor(context.cursor.line + (result.cursor.line - context.cursor.line) * progress)
-        local col = math.floor(context.cursor.col + (result.cursor.col - context.cursor.col) * progress)
-        viewport.set_cursor_position(line, col)
+        if result.cursor then
+          context:set_cursor(result.cursor.line, result.cursor.col)
+        end
       end,
     })
 

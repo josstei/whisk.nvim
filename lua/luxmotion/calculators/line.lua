@@ -1,5 +1,3 @@
-local viewport = require("luxmotion.core.viewport")
-
 local M = {}
 
 local function get_first_non_blank(line_num)

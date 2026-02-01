@@ -1,5 +1,3 @@
-local viewport = require("luxmotion.core.viewport")
-
 local M = {}
 
 local function calculate_topline(target_line, context)

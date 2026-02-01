@@ -15,8 +15,6 @@ require('tests.unit.config.validation_spec')
 require('tests.unit.config.management_spec')
 require('tests.unit.config_spec')
 
-require('tests.unit.core.viewport_spec')
-
 require('tests.unit.context.builder_spec')
 require('tests.unit.context.Context_spec')
 

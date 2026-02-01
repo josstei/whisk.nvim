@@ -84,7 +84,6 @@ describe('performance', function()
       table.insert(large_content, "line " .. i)
     end
     mocks.set_buffer_content(large_content)
-    require('luxmotion.core.viewport').invalidate_cache()
     assert.is_true(performance.should_auto_enable())
   end)
 
@@ -97,7 +96,6 @@ describe('performance', function()
       table.insert(content, "line " .. i)
     end
     mocks.set_buffer_content(content)
-    require('luxmotion.core.viewport').invalidate_cache()
 
     assert.is_true(performance.should_auto_enable())
   end)
@@ -111,7 +109,6 @@ describe('performance', function()
       table.insert(large_content, "line " .. i)
     end
     mocks.set_buffer_content(large_content)
-    require('luxmotion.core.viewport').invalidate_cache()
 
     assert.is_false(performance.should_auto_enable())
   end)
@@ -125,7 +122,6 @@ describe('performance', function()
       table.insert(content, "line " .. i)
     end
     mocks.set_buffer_content(content)
-    require('luxmotion.core.viewport').invalidate_cache()
 
     performance.auto_toggle()
     assert.is_true(performance.is_active())
@@ -134,7 +130,6 @@ describe('performance', function()
   it('auto_toggle disables for small files', function()
     performance.enable()
     mocks.set_buffer_content({ "small", "file" })
-    require('luxmotion.core.viewport').invalidate_cache()
 
     performance.auto_toggle()
     assert.is_false(performance.is_active())

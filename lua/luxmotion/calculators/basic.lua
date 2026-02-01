@@ -1,6 +1,15 @@
-local viewport = require("luxmotion.core.viewport")
-
 local M = {}
+
+local function get_line_length(context, line_num)
+  if context.get_line_length then
+    return context:get_line_length(line_num)
+  end
+  local lines = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)
+  if not lines or not lines[1] then
+    return 0
+  end
+  return #lines[1]
+end
 
 function M.h(context)
   local target_col = math.max(context.cursor.col - context.input.count, 0)
@@ -24,7 +33,7 @@ function M.k(context)
 end
 
 function M.l(context)
-  local line_length = viewport.get_line_length(context.cursor.line)
+  local line_length = get_line_length(context, context.cursor.line)
   local target_col = math.min(context.cursor.col + context.input.count, math.max(line_length - 1, 0))
   return {
     cursor = { line = context.cursor.line, col = target_col },
@@ -38,7 +47,7 @@ M["0"] = function(context)
 end
 
 M["$"] = function(context)
-  local line_length = viewport.get_line_length(context.cursor.line)
+  local line_length = get_line_length(context, context.cursor.line)
   return {
     cursor = { line = context.cursor.line, col = math.max(line_length - 1, 0) },
   }
