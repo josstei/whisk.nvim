@@ -214,4 +214,69 @@ describe('registry/traits', function()
     assert.is_nil(trait.on_start)
     assert.is_nil(trait.on_complete)
   end)
+
+  it('invoke_start calls on_start for trait', function()
+    local started = false
+    traits.register({
+      id = 'test_start',
+      apply = function() end,
+      on_start = function(ctx) started = true end,
+    })
+
+    traits.invoke_start('test_start', { cursor = { line = 1 } })
+    assert.is_true(started)
+  end)
+
+  it('invoke_start passes context to on_start', function()
+    local received_ctx = nil
+    traits.register({
+      id = 'test_ctx',
+      apply = function() end,
+      on_start = function(ctx) received_ctx = ctx end,
+    })
+
+    local context = { cursor = { line = 5 } }
+    traits.invoke_start('test_ctx', context)
+    assert.equals(received_ctx, context)
+  end)
+
+  it('invoke_start does nothing without on_start', function()
+    traits.register({
+      id = 'no_start',
+      apply = function() end,
+    })
+
+    assert.does_not_throw(function()
+      traits.invoke_start('no_start', {})
+    end)
+  end)
+
+  it('invoke_start does nothing for unknown trait', function()
+    assert.does_not_throw(function()
+      traits.invoke_start('unknown', {})
+    end)
+  end)
+
+  it('invoke_complete calls on_complete for trait', function()
+    local completed = false
+    traits.register({
+      id = 'test_complete',
+      apply = function() end,
+      on_complete = function(ctx) completed = true end,
+    })
+
+    traits.invoke_complete('test_complete', { cursor = { line = 1 } })
+    assert.is_true(completed)
+  end)
+
+  it('invoke_complete does nothing without on_complete', function()
+    traits.register({
+      id = 'no_complete',
+      apply = function() end,
+    })
+
+    assert.does_not_throw(function()
+      traits.invoke_complete('no_complete', {})
+    end)
+  end)
 end)

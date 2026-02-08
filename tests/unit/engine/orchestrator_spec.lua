@@ -188,4 +188,36 @@ describe('engine/orchestrator', function()
     orchestrator.execute('test_j', { count = 1 })
     assert.is_true(traits.is_animating('cursor'))
   end)
+
+  it('execute calls trait on_start before animation', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { enabled = true } })
+
+    local start_called = false
+    traits.clear()
+    traits.register({
+      id = 'cursor',
+      apply = function(context, result, progress)
+        if result.cursor then
+          context:set_cursor(result.cursor.line, result.cursor.col)
+        end
+      end,
+      on_start = function(ctx) start_called = true end,
+    })
+
+    motions.clear()
+    motions.register({
+      id = 'test_j',
+      keys = { 'j' },
+      modes = { 'n' },
+      traits = { 'cursor' },
+      category = 'cursor',
+      calculator = function(ctx)
+        return { cursor = { line = ctx.cursor.line + 1, col = ctx.cursor.col } }
+      end,
+    })
+
+    orchestrator.execute('test_j', { count = 1 })
+    assert.is_true(start_called)
+  end)
 end)

@@ -33,6 +33,20 @@ function M.apply_frame(trait_id, context, result, progress)
   end
 end
 
+function M.invoke_start(trait_id, context)
+  local trait = traits[trait_id]
+  if trait and trait.on_start then
+    trait.on_start(context)
+  end
+end
+
+function M.invoke_complete(trait_id, context)
+  local trait = traits[trait_id]
+  if trait and trait.on_complete then
+    trait.on_complete(context)
+  end
+end
+
 function M.all()
   return traits
 end

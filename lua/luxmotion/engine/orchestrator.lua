@@ -52,6 +52,10 @@ function M.execute(motion_id, input)
     traits.set_animating(trait_id, true)
   end
 
+  for _, trait_id in ipairs(motion.traits) do
+    traits.invoke_start(trait_id, context)
+  end
+
   loop.start({
     context = context,
     result = result,
@@ -61,6 +65,13 @@ function M.execute(motion_id, input)
     on_complete = function()
       for _, trait_id in ipairs(motion.traits) do
         traits.set_animating(trait_id, false)
+        traits.invoke_complete(trait_id, context)
+      end
+    end,
+    on_cancel = function()
+      for _, trait_id in ipairs(motion.traits) do
+        traits.set_animating(trait_id, false)
+        traits.invoke_complete(trait_id, context)
       end
     end,
   })
