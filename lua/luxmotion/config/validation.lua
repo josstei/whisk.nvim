@@ -17,8 +17,11 @@ local function validate_trail(trail, category_name)
   end
 
   if trail.color ~= nil then
-    if type(trail.color) ~= "string" or not trail.color:match("^#%x%x%x%x%x%x$") then
-      error(category_name .. ".trail.color must be a 6-digit hex string (e.g. '#FF0000')")
+    if type(trail.color) ~= "string" then
+      error(category_name .. ".trail.color must be a string ('auto' or a 6-digit hex like '#FF0000')")
+    end
+    if trail.color ~= "auto" and not trail.color:match("^#%x%x%x%x%x%x$") then
+      error(category_name .. ".trail.color must be 'auto' or a 6-digit hex string (e.g. '#FF0000')")
     end
   end
 

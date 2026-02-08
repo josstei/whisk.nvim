@@ -36,14 +36,16 @@ function M.setup(user_config)
   end
 
   if cursor_cfg.trail and cursor_cfg.trail.enabled then
-    trail_highlights.setup(cursor_cfg.trail.color, bg_color, cursor_cfg.trail.segments)
+    local resolved_color = trail_highlights.resolve_color(cursor_cfg.trail.color)
+    trail_highlights.setup(resolved_color, bg_color, cursor_cfg.trail.segments)
   end
 
   if scroll_cfg.trail and scroll_cfg.trail.enabled then
     local scroll_segments = scroll_cfg.trail.segments
     local cursor_already_covers = cursor_cfg.trail and cursor_cfg.trail.enabled and cursor_cfg.trail.segments >= scroll_segments
     if not cursor_already_covers then
-      trail_highlights.setup(scroll_cfg.trail.color, bg_color, scroll_segments)
+      local resolved_color = trail_highlights.resolve_color(scroll_cfg.trail.color)
+      trail_highlights.setup(resolved_color, bg_color, scroll_segments)
     end
   end
 

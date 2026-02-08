@@ -1,8 +1,11 @@
 local M = {}
 
 local function compute_intensity(index, total)
+  if total <= 1 then
+    return 1.0
+  end
   local t = (index - 1) / (total - 1)
-  return 0.90 * (1.0 - t) * (1.0 - t)
+  return (1.0 - t) ^ 1.2
 end
 
 function M.parse_hex(hex)
@@ -30,6 +33,34 @@ end
 
 function M.get_group_name(index)
   return 'LuxMotionTrail' .. index
+end
+
+function M.resolve_color(color_value)
+  if color_value ~= "auto" then
+    return color_value
+  end
+
+  local ok, cursor_hl = pcall(vim.api.nvim_get_hl, 0, { name = 'Cursor' })
+  if ok and cursor_hl then
+    local bg = cursor_hl.bg
+    if bg then
+      return M.to_hex(
+        math.floor(bg / 65536) % 256,
+        math.floor(bg / 256) % 256,
+        bg % 256
+      )
+    end
+    local fg = cursor_hl.fg
+    if fg then
+      return M.to_hex(
+        math.floor(fg / 65536) % 256,
+        math.floor(fg / 256) % 256,
+        fg % 256
+      )
+    end
+  end
+
+  return '#FFFFFF'
 end
 
 function M.setup(trail_color, bg_color, segments)

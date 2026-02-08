@@ -96,6 +96,31 @@ describe('trail/highlights', function()
     assert.equals(b, 128)
   end)
 
+  it('exports resolve_color function', function()
+    assert.is_type(highlights.resolve_color, 'function')
+  end)
+
+  it('resolve_color returns hex color unchanged', function()
+    assert.equals(highlights.resolve_color('#FF0000'), '#FF0000')
+  end)
+
+  it('resolve_color auto returns Cursor bg when available', function()
+    vim.api.nvim_set_hl(0, 'Cursor', { bg = 65280 })
+    local result = highlights.resolve_color('auto')
+    assert.equals(result, '#00FF00')
+  end)
+
+  it('resolve_color auto falls back to Cursor fg when no bg', function()
+    vim.api.nvim_set_hl(0, 'Cursor', { fg = 16711680 })
+    local result = highlights.resolve_color('auto')
+    assert.equals(result, '#FF0000')
+  end)
+
+  it('resolve_color auto falls back to white when no Cursor hl', function()
+    local result = highlights.resolve_color('auto')
+    assert.equals(result, '#FFFFFF')
+  end)
+
   it('get_group_name returns correct name for index', function()
     assert.equals(highlights.get_group_name(1), 'LuxMotionTrail1')
     assert.equals(highlights.get_group_name(3), 'LuxMotionTrail3')

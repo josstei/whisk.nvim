@@ -7,7 +7,7 @@ M.config = {
     enabled = true,
     trail = {
       enabled = true,
-      color = "#E8A84C",
+      color = "auto",
       segments = 6,
     },
   },
@@ -17,7 +17,7 @@ M.config = {
     enabled = true,
     trail = {
       enabled = false,
-      color = "#E8A84C",
+      color = "auto",
       segments = 6,
     },
   },

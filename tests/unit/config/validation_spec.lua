@@ -283,6 +283,15 @@ describe('config/validation', function()
     end)
   end)
 
+  it('accepts auto as trail.color', function()
+    local config = {
+      cursor = { trail = { color = 'auto' } },
+    }
+    assert.does_not_throw(function()
+      validation.validate_config(config)
+    end)
+  end)
+
   it('accepts partial trail config', function()
     local config = {
       cursor = { trail = { enabled = false } },
