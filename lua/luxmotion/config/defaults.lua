@@ -8,7 +8,7 @@ M.config = {
     trail = {
       enabled = true,
       color = "auto",
-      segments = 6,
+      segments = 8,
     },
   },
   scroll = {
@@ -18,7 +18,7 @@ M.config = {
     trail = {
       enabled = false,
       color = "auto",
-      segments = 6,
+      segments = 8,
     },
   },
   keymaps = {

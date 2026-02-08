@@ -5,7 +5,7 @@ local function compute_intensity(index, total)
     return 1.0
   end
   local t = (index - 1) / (total - 1)
-  return (1.0 - t) ^ 1.2
+  return 1.0 - t
 end
 
 function M.parse_hex(hex)
