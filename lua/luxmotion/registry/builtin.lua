@@ -1,6 +1,9 @@
 local traits = require("luxmotion.registry.traits")
 local motions = require("luxmotion.registry.motions")
 local calculators = require("luxmotion.calculators")
+local config = require("luxmotion.config")
+local renderer = require("luxmotion.trail.renderer")
+local trail_highlights = require("luxmotion.trail.highlights")
 
 local M = {}
 
@@ -22,15 +25,72 @@ function M.register_traits()
       end
     end,
   })
+
+  local cursor_config = config.get("cursor")
+  local scroll_config = config.get("scroll")
+  local cursor_trail = cursor_config and cursor_config.trail
+  local scroll_trail = scroll_config and scroll_config.trail
+
+  local trail_enabled = (cursor_trail and cursor_trail.enabled) or (scroll_trail and scroll_trail.enabled)
+
+  if trail_enabled then
+    traits.register({
+      id = "trail",
+      apply = function(context, result, progress)
+        local category_config = config.get(context.category or "cursor")
+        local trail = category_config and category_config.trail
+        if not trail then
+          return
+        end
+        renderer.push_position(context.bufnr, result, trail.segments)
+        renderer.render(context.bufnr, trail.segments)
+      end,
+      on_start = function(context)
+        renderer.reset()
+      end,
+      on_complete = function(context)
+        if context and context.bufnr then
+          renderer.clear(context.bufnr)
+        else
+          renderer.reset()
+        end
+      end,
+    })
+  end
 end
 
 function M.register_motions()
+  local cursor_cfg = config.get("cursor")
+  local scroll_cfg = config.get("scroll")
+  local cursor_trail_enabled = cursor_cfg and cursor_cfg.trail and cursor_cfg.trail.enabled
+  local scroll_trail_enabled = scroll_cfg and scroll_cfg.trail and scroll_cfg.trail.enabled
+
+  local function cursor_traits(base)
+    if cursor_trail_enabled then
+      local t = {}
+      for _, v in ipairs(base) do table.insert(t, v) end
+      table.insert(t, "trail")
+      return t
+    end
+    return base
+  end
+
+  local function scroll_traits(base)
+    if scroll_trail_enabled then
+      local t = {}
+      for _, v in ipairs(base) do table.insert(t, v) end
+      table.insert(t, "trail")
+      return t
+    end
+    return base
+  end
+
   for _, dir in ipairs({ "h", "j", "k", "l" }) do
     motions.register({
       id = "basic_" .. dir,
       keys = { dir },
       modes = { "n", "v" },
-      traits = { "cursor" },
+      traits = cursor_traits({ "cursor" }),
       category = "cursor",
       calculator = calculators.basic[dir],
       description = "move " .. dir,
@@ -42,7 +102,7 @@ function M.register_motions()
     id = "basic_0",
     keys = { "0" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.basic["0"],
     description = "move to line start",
@@ -52,7 +112,7 @@ function M.register_motions()
     id = "basic_$",
     keys = { "$" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.basic["$"],
     description = "move to line end",
@@ -63,7 +123,7 @@ function M.register_motions()
       id = "word_" .. dir,
       keys = { dir },
       modes = { "n", "v" },
-      traits = { "cursor" },
+      traits = cursor_traits({ "cursor" }),
       category = "cursor",
       calculator = calculators.word[dir],
       description = "word " .. dir,
@@ -76,7 +136,7 @@ function M.register_motions()
       id = "find_" .. dir,
       keys = { dir },
       modes = { "n", "v" },
-      traits = { "cursor" },
+      traits = cursor_traits({ "cursor" }),
       category = "cursor",
       calculator = calculators.find[dir],
       description = "find " .. dir,
@@ -96,7 +156,7 @@ function M.register_motions()
       id = "text_object_" .. key,
       keys = { key },
       modes = { "n", "v" },
-      traits = { "cursor" },
+      traits = cursor_traits({ "cursor" }),
       category = "cursor",
       calculator = calculators.text_object[key],
       description = desc,
@@ -108,7 +168,7 @@ function M.register_motions()
     id = "line_gg",
     keys = { "gg" },
     modes = { "n", "v" },
-    traits = { "cursor", "scroll" },
+    traits = cursor_traits({ "cursor", "scroll" }),
     category = "cursor",
     calculator = calculators.line.gg,
     description = "goto first line",
@@ -119,7 +179,7 @@ function M.register_motions()
     id = "line_G",
     keys = { "G" },
     modes = { "n", "v" },
-    traits = { "cursor", "scroll" },
+    traits = cursor_traits({ "cursor", "scroll" }),
     category = "cursor",
     calculator = calculators.line.G,
     description = "goto last line",
@@ -130,7 +190,7 @@ function M.register_motions()
     id = "line_|",
     keys = { "|" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.line["|"],
     description = "goto column",
@@ -141,7 +201,7 @@ function M.register_motions()
     id = "search_n",
     keys = { "n" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.search.n,
     description = "next search result",
@@ -152,7 +212,7 @@ function M.register_motions()
     id = "search_N",
     keys = { "N" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.search.N,
     description = "previous search result",
@@ -163,7 +223,7 @@ function M.register_motions()
     id = "screen_gj",
     keys = { "gj" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.search.gj,
     description = "down screen line",
@@ -174,7 +234,7 @@ function M.register_motions()
     id = "screen_gk",
     keys = { "gk" },
     modes = { "n", "v" },
-    traits = { "cursor" },
+    traits = cursor_traits({ "cursor" }),
     category = "cursor",
     calculator = calculators.search.gk,
     description = "up screen line",
@@ -185,7 +245,7 @@ function M.register_motions()
     id = "scroll_ctrl_d",
     keys = { "<C-d>" },
     modes = { "n", "v" },
-    traits = { "cursor", "scroll" },
+    traits = scroll_traits({ "cursor", "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.ctrl_d,
     description = "scroll down half-page",
@@ -196,7 +256,7 @@ function M.register_motions()
     id = "scroll_ctrl_u",
     keys = { "<C-u>" },
     modes = { "n", "v" },
-    traits = { "cursor", "scroll" },
+    traits = scroll_traits({ "cursor", "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.ctrl_u,
     description = "scroll up half-page",
@@ -207,7 +267,7 @@ function M.register_motions()
     id = "scroll_ctrl_f",
     keys = { "<C-f>" },
     modes = { "n", "v" },
-    traits = { "cursor", "scroll" },
+    traits = scroll_traits({ "cursor", "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.ctrl_f,
     description = "scroll down full-page",
@@ -218,7 +278,7 @@ function M.register_motions()
     id = "scroll_ctrl_b",
     keys = { "<C-b>" },
     modes = { "n", "v" },
-    traits = { "cursor", "scroll" },
+    traits = scroll_traits({ "cursor", "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.ctrl_b,
     description = "scroll up full-page",
@@ -229,7 +289,7 @@ function M.register_motions()
     id = "position_zz",
     keys = { "zz" },
     modes = { "n" },
-    traits = { "scroll" },
+    traits = scroll_traits({ "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.zz,
     description = "center cursor",
@@ -239,7 +299,7 @@ function M.register_motions()
     id = "position_zt",
     keys = { "zt" },
     modes = { "n" },
-    traits = { "scroll" },
+    traits = scroll_traits({ "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.zt,
     description = "cursor to top",
@@ -249,7 +309,7 @@ function M.register_motions()
     id = "position_zb",
     keys = { "zb" },
     modes = { "n" },
-    traits = { "scroll" },
+    traits = scroll_traits({ "scroll" }),
     category = "scroll",
     calculator = calculators.scroll.zb,
     description = "cursor to bottom",

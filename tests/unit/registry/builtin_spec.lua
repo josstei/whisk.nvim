@@ -249,4 +249,91 @@ describe('registry/builtin', function()
     assert.equals(new_cursor[1], 1)
     assert.equals(new_cursor[2], 0)
   end)
+
+  it('register_traits registers trail trait when cursor trail enabled', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { trail = { enabled = true } } })
+
+    traits.clear()
+    builtin.register_traits()
+
+    local trail = traits.get('trail')
+    assert.is_not_nil(trail)
+    assert.equals(trail.id, 'trail')
+    assert.is_type(trail.apply, 'function')
+  end)
+
+  it('register_traits registers trail trait when scroll trail enabled', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { trail = { enabled = false } }, scroll = { trail = { enabled = true } } })
+
+    traits.clear()
+    builtin.register_traits()
+
+    local trail = traits.get('trail')
+    assert.is_not_nil(trail)
+  end)
+
+  it('register_traits skips trail trait when both trails disabled', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { trail = { enabled = false } }, scroll = { trail = { enabled = false } } })
+
+    traits.clear()
+    builtin.register_traits()
+
+    local trail = traits.get('trail')
+    assert.is_nil(trail)
+  end)
+
+  it('register_motions adds trail to cursor motion traits when cursor trail enabled', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { trail = { enabled = true } } })
+
+    motions.clear()
+    builtin.register_motions()
+
+    local basic_j = motions.get('basic_j')
+    assert.contains(basic_j.traits, 'trail')
+  end)
+
+  it('register_motions does not add trail to cursor motions when cursor trail disabled', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { trail = { enabled = false } } })
+
+    motions.clear()
+    builtin.register_motions()
+
+    local basic_j = motions.get('basic_j')
+    local has_trail = false
+    for _, t in ipairs(basic_j.traits) do
+      if t == 'trail' then has_trail = true end
+    end
+    assert.is_false(has_trail)
+  end)
+
+  it('register_motions adds trail to scroll motion traits when scroll trail enabled', function()
+    local config = require('luxmotion.config')
+    config.update({ scroll = { trail = { enabled = true } } })
+
+    motions.clear()
+    builtin.register_motions()
+
+    local scroll_d = motions.get('scroll_ctrl_d')
+    assert.contains(scroll_d.traits, 'trail')
+  end)
+
+  it('register_motions does not add trail to scroll motions when scroll trail disabled', function()
+    local config = require('luxmotion.config')
+    config.update({ scroll = { trail = { enabled = false } } })
+
+    motions.clear()
+    builtin.register_motions()
+
+    local scroll_d = motions.get('scroll_ctrl_d')
+    local has_trail = false
+    for _, t in ipairs(scroll_d.traits) do
+      if t == 'trail' then has_trail = true end
+    end
+    assert.is_false(has_trail)
+  end)
 end)
