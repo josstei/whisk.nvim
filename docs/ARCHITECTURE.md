@@ -42,6 +42,9 @@ flowchart LR
   builtin --> motions[lua/luxmotion/registry/motions.lua]
   builtin --> traits[lua/luxmotion/registry/traits.lua]
   builtin --> calculators[lua/luxmotion/calculators/*]
+  builtin --> trail_hl[lua/luxmotion/trail/highlights.lua]
+  builtin --> trail_rn[lua/luxmotion/trail/renderer.lua]
+  trail_rn --> trail_hl
 
   keymaps --> orchestrator[lua/luxmotion/engine/orchestrator.lua]
   orchestrator --> motions
@@ -88,6 +91,10 @@ flowchart LR
   - `loop.lua`: frame loop and easing interpolation.
   - `pool.lua`: object pool for animation frames.
 
+- `lua/luxmotion/trail/*`
+  - `highlights.lua`: generates highlight groups by blending trail color toward Normal background. Supports per-category colors and segment counts.
+  - `renderer.lua`: manages a ring buffer of recent cursor positions and places/clears extmarks each frame using a dedicated namespace.
+
 - `lua/luxmotion/core/viewport.lua`
   - Window/viewport helpers and a short-lived cache for window metrics.
 
@@ -124,6 +131,8 @@ Traits are small apply functions that know how to apply a frame:
 
 - `cursor` trait uses `viewport.set_cursor_position()`.
 - `scroll` trait uses `viewport.restore_view()`.
+
+- `trail` trait uses `renderer.push_position()` and `renderer.render()` each frame. Uses `on_start` to reset the position buffer and `on_complete` to clear all extmarks.
 
 Traits also track animation state to prevent overlapping animations of the same type.
 
