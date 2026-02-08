@@ -9,6 +9,12 @@ M.config = {
       enabled = true,
       color = "auto",
       segments = 10,
+      policy = "distance",
+      distance = {
+        min_lines = 2,
+        min_cols = 5,
+      },
+      overrides = {},
     },
   },
   scroll = {
@@ -19,6 +25,12 @@ M.config = {
       enabled = false,
       color = "auto",
       segments = 10,
+      policy = "always",
+      distance = {
+        min_lines = 2,
+        min_cols = 5,
+      },
+      overrides = {},
     },
   },
   keymaps = {

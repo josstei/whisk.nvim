@@ -30,6 +30,34 @@ local function validate_trail(trail, category_name)
       error(category_name .. ".trail.segments must be an integer between 2 and 12")
     end
   end
+
+  if trail.policy ~= nil then
+    if type(trail.policy) ~= "string" then
+      error(category_name .. ".trail.policy must be a string")
+    end
+  end
+
+  if trail.distance ~= nil then
+    if type(trail.distance) ~= "table" then
+      error(category_name .. ".trail.distance must be a table")
+    end
+    if trail.distance.min_lines ~= nil then
+      if type(trail.distance.min_lines) ~= "number" or trail.distance.min_lines < 0 then
+        error(category_name .. ".trail.distance.min_lines must be a non-negative number")
+      end
+    end
+    if trail.distance.min_cols ~= nil then
+      if type(trail.distance.min_cols) ~= "number" or trail.distance.min_cols < 0 then
+        error(category_name .. ".trail.distance.min_cols must be a non-negative number")
+      end
+    end
+  end
+
+  if trail.overrides ~= nil then
+    if type(trail.overrides) ~= "table" then
+      error(category_name .. ".trail.overrides must be a table")
+    end
+  end
 end
 
 function M.validate_config(config)

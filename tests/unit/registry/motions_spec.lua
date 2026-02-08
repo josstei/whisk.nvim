@@ -225,4 +225,33 @@ describe('registry/motions', function()
     local motion = motions.get('default_modes')
     assert.is_not_nil(motion.modes)
   end)
+
+  it('register stores trail_policy', function()
+    motions.register({
+      id = 'with_policy',
+      keys = { 'j' },
+      modes = { 'n' },
+      traits = { 'cursor' },
+      category = 'cursor',
+      calculator = function() return {} end,
+      trail_policy = 'distance',
+    })
+
+    local motion = motions.get('with_policy')
+    assert.equals(motion.trail_policy, 'distance')
+  end)
+
+  it('register defaults trail_policy to nil', function()
+    motions.register({
+      id = 'no_policy',
+      keys = { 'j' },
+      modes = { 'n' },
+      traits = { 'cursor' },
+      category = 'cursor',
+      calculator = function() return {} end,
+    })
+
+    local motion = motions.get('no_policy')
+    assert.is_nil(motion.trail_policy)
+  end)
 end)

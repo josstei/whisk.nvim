@@ -312,4 +312,76 @@ describe('config/validation', function()
       validation.validate_config({ scroll = { trail = { segments = 0 } } })
     end, 'trail.segments')
   end)
+
+  it('accepts valid trail policy string', function()
+    assert.does_not_throw(function()
+      validation.validate_config({
+        cursor = { trail = { policy = 'distance' } },
+      })
+    end)
+  end)
+
+  it('rejects non-string trail policy', function()
+    assert.throws(function()
+      validation.validate_config({
+        cursor = { trail = { policy = 123 } },
+      })
+    end)
+  end)
+
+  it('accepts valid distance thresholds', function()
+    assert.does_not_throw(function()
+      validation.validate_config({
+        cursor = { trail = { distance = { min_lines = 3, min_cols = 8 } } },
+      })
+    end)
+  end)
+
+  it('rejects non-number min_lines', function()
+    assert.throws(function()
+      validation.validate_config({
+        cursor = { trail = { distance = { min_lines = 'two' } } },
+      })
+    end)
+  end)
+
+  it('rejects negative min_lines', function()
+    assert.throws(function()
+      validation.validate_config({
+        cursor = { trail = { distance = { min_lines = -1 } } },
+      })
+    end)
+  end)
+
+  it('rejects non-number min_cols', function()
+    assert.throws(function()
+      validation.validate_config({
+        cursor = { trail = { distance = { min_cols = true } } },
+      })
+    end)
+  end)
+
+  it('rejects negative min_cols', function()
+    assert.throws(function()
+      validation.validate_config({
+        cursor = { trail = { distance = { min_cols = -5 } } },
+      })
+    end)
+  end)
+
+  it('accepts valid overrides table', function()
+    assert.does_not_throw(function()
+      validation.validate_config({
+        cursor = { trail = { overrides = { basic_j = 'always' } } },
+      })
+    end)
+  end)
+
+  it('rejects non-table overrides', function()
+    assert.throws(function()
+      validation.validate_config({
+        cursor = { trail = { overrides = 'invalid' } },
+      })
+    end)
+  end)
 end)

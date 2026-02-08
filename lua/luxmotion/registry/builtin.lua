@@ -95,6 +95,7 @@ function M.register_motions()
       calculator = calculators.basic[dir],
       description = "move " .. dir,
       input = "count",
+      trail_policy = "distance",
     })
   end
 
@@ -106,6 +107,7 @@ function M.register_motions()
     category = "cursor",
     calculator = calculators.basic["0"],
     description = "move to line start",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -116,6 +118,7 @@ function M.register_motions()
     category = "cursor",
     calculator = calculators.basic["$"],
     description = "move to line end",
+    trail_policy = "always",
   })
 
   for _, dir in ipairs({ "w", "b", "e", "W", "B", "E" }) do
@@ -128,6 +131,7 @@ function M.register_motions()
       calculator = calculators.word[dir],
       description = "word " .. dir,
       input = "count",
+      trail_policy = "always",
     })
   end
 
@@ -141,6 +145,7 @@ function M.register_motions()
       calculator = calculators.find[dir],
       description = "find " .. dir,
       input = "char",
+      trail_policy = "always",
     })
   end
 
@@ -161,6 +166,7 @@ function M.register_motions()
       calculator = calculators.text_object[key],
       description = desc,
       input = "count",
+      trail_policy = "always",
     })
   end
 
@@ -173,6 +179,7 @@ function M.register_motions()
     calculator = calculators.line.gg,
     description = "goto first line",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -184,6 +191,7 @@ function M.register_motions()
     calculator = calculators.line.G,
     description = "goto last line",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -195,6 +203,7 @@ function M.register_motions()
     calculator = calculators.line["|"],
     description = "goto column",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -206,6 +215,7 @@ function M.register_motions()
     calculator = calculators.search.n,
     description = "next search result",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -217,6 +227,7 @@ function M.register_motions()
     calculator = calculators.search.N,
     description = "previous search result",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -228,6 +239,7 @@ function M.register_motions()
     calculator = calculators.search.gj,
     description = "down screen line",
     input = "count",
+    trail_policy = "distance",
   })
 
   motions.register({
@@ -239,6 +251,7 @@ function M.register_motions()
     calculator = calculators.search.gk,
     description = "up screen line",
     input = "count",
+    trail_policy = "distance",
   })
 
   motions.register({
@@ -250,6 +263,7 @@ function M.register_motions()
     calculator = calculators.scroll.ctrl_d,
     description = "scroll down half-page",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -261,6 +275,7 @@ function M.register_motions()
     calculator = calculators.scroll.ctrl_u,
     description = "scroll up half-page",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -272,6 +287,7 @@ function M.register_motions()
     calculator = calculators.scroll.ctrl_f,
     description = "scroll down full-page",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -283,6 +299,7 @@ function M.register_motions()
     calculator = calculators.scroll.ctrl_b,
     description = "scroll up full-page",
     input = "count",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -293,6 +310,7 @@ function M.register_motions()
     category = "scroll",
     calculator = calculators.scroll.zz,
     description = "center cursor",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -303,6 +321,7 @@ function M.register_motions()
     category = "scroll",
     calculator = calculators.scroll.zt,
     description = "cursor to top",
+    trail_policy = "always",
   })
 
   motions.register({
@@ -313,6 +332,7 @@ function M.register_motions()
     category = "scroll",
     calculator = calculators.scroll.zb,
     description = "cursor to bottom",
+    trail_policy = "always",
   })
 end
 

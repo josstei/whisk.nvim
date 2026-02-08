@@ -336,4 +336,68 @@ describe('registry/builtin', function()
     end
     assert.is_false(has_trail)
   end)
+
+  it('basic motions have distance trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'basic_h', 'basic_j', 'basic_k', 'basic_l' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'distance', id .. ' should have distance policy')
+    end
+  end)
+
+  it('screen motions have distance trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'screen_gj', 'screen_gk' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'distance', id .. ' should have distance policy')
+    end
+  end)
+
+  it('word motions have always trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'word_w', 'word_b', 'word_e', 'word_W', 'word_B', 'word_E' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
+    end
+  end)
+
+  it('find motions have always trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'find_f', 'find_F', 'find_t', 'find_T' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
+    end
+  end)
+
+  it('line position motions have always trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'basic_0', 'basic_$', 'line_gg', 'line_G', 'line_|' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
+    end
+  end)
+
+  it('text object motions have always trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'text_object_{', 'text_object_}', 'text_object_(', 'text_object_)', 'text_object_%' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
+    end
+  end)
+
+  it('search motions have always trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'search_n', 'search_N' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
+    end
+  end)
+
+  it('scroll motions have always trail_policy', function()
+    builtin.register_motions()
+    for _, id in ipairs({ 'scroll_ctrl_d', 'scroll_ctrl_u', 'scroll_ctrl_f', 'scroll_ctrl_b', 'position_zz', 'position_zt', 'position_zb' }) do
+      local motion = motions.get(id)
+      assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
+    end
+  end)
 end)

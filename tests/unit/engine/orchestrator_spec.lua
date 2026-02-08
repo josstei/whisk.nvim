@@ -241,4 +241,36 @@ describe('engine/orchestrator', function()
     orchestrator.execute('test_j', { count = 1 })
     assert.is_true(start_called)
   end)
+
+  it('execute sets motion_id on context', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { enabled = true } })
+
+    local received_motion_id = nil
+    traits.clear()
+    traits.register({
+      id = 'cursor',
+      apply = function(context, result, progress)
+        if result.cursor then
+          context:set_cursor(result.cursor.line, result.cursor.col)
+        end
+      end,
+    })
+
+    motions.clear()
+    motions.register({
+      id = 'test_j',
+      keys = { 'j' },
+      modes = { 'n' },
+      traits = { 'cursor' },
+      category = 'cursor',
+      calculator = function(ctx)
+        received_motion_id = ctx.motion_id
+        return { cursor = { line = ctx.cursor.line + 1, col = ctx.cursor.col } }
+      end,
+    })
+
+    orchestrator.execute('test_j', { count = 1 })
+    assert.equals(received_motion_id, 'test_j')
+  end)
 end)

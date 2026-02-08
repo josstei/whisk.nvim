@@ -13,6 +13,7 @@ function M.register(definition)
     calculator = definition.calculator,
     description = definition.description,
     input = definition.input,
+    trail_policy = definition.trail_policy,
   }
 
   motions[motion.id] = motion

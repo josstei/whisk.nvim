@@ -107,4 +107,30 @@ describe('config/defaults', function()
     assert.is_type(defaults.config.scroll.trail.color, 'string')
     assert.is_type(defaults.config.scroll.trail.segments, 'number')
   end)
+
+  it('cursor trail has policy default', function()
+    assert.equals(defaults.config.cursor.trail.policy, 'distance')
+  end)
+
+  it('cursor trail has distance thresholds', function()
+    assert.equals(defaults.config.cursor.trail.distance.min_lines, 2)
+    assert.equals(defaults.config.cursor.trail.distance.min_cols, 5)
+  end)
+
+  it('cursor trail has empty overrides', function()
+    assert.is_type(defaults.config.cursor.trail.overrides, 'table')
+  end)
+
+  it('scroll trail has policy default', function()
+    assert.equals(defaults.config.scroll.trail.policy, 'always')
+  end)
+
+  it('scroll trail has distance thresholds', function()
+    assert.equals(defaults.config.scroll.trail.distance.min_lines, 2)
+    assert.equals(defaults.config.scroll.trail.distance.min_cols, 5)
+  end)
+
+  it('scroll trail has empty overrides', function()
+    assert.is_type(defaults.config.scroll.trail.overrides, 'table')
+  end)
 end)

@@ -227,17 +227,20 @@ describe('registry/traits', function()
     assert.is_true(started)
   end)
 
-  it('invoke_start passes context to on_start', function()
+  it('invoke_start passes context and result to on_start', function()
     local received_ctx = nil
+    local received_result = nil
     traits.register({
       id = 'test_ctx',
       apply = function() end,
-      on_start = function(ctx) received_ctx = ctx end,
+      on_start = function(ctx, res) received_ctx = ctx; received_result = res end,
     })
 
     local context = { cursor = { line = 5 } }
-    traits.invoke_start('test_ctx', context)
+    local result = { cursor = { line = 10 } }
+    traits.invoke_start('test_ctx', context, result)
     assert.equals(received_ctx, context)
+    assert.equals(received_result, result)
   end)
 
   it('invoke_start does nothing without on_start', function()

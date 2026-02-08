@@ -39,6 +39,7 @@ function M.execute(motion_id, input)
 
   local context = context_builder.build(input)
   context.category = motion.category
+  context.motion_id = motion.id
   local result = motion.calculator(context)
 
   if not result then
@@ -54,7 +55,7 @@ function M.execute(motion_id, input)
   end
 
   for _, trait_id in ipairs(motion.traits) do
-    traits.invoke_start(trait_id, context)
+    traits.invoke_start(trait_id, context, result)
   end
 
   loop.start({

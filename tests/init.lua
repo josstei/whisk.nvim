@@ -43,6 +43,7 @@ require('tests.unit.trail.renderer_spec')
 require('tests.unit.trail.policies.always_spec')
 require('tests.unit.trail.policies.distance_spec')
 require('tests.unit.trail.policies.never_spec')
+require('tests.unit.trail.policies.registry_spec')
 
 require('tests.unit.performance_spec')
 

@@ -33,10 +33,10 @@ function M.apply_frame(trait_id, context, result, progress)
   end
 end
 
-function M.invoke_start(trait_id, context)
+function M.invoke_start(trait_id, context, result)
   local trait = traits[trait_id]
   if trait and trait.on_start then
-    trait.on_start(context)
+    trait.on_start(context, result)
   end
 end
 
