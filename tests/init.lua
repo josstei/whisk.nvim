@@ -40,6 +40,9 @@ require('tests.unit.utils.visual_spec')
 
 require('tests.unit.trail.highlights_spec')
 require('tests.unit.trail.renderer_spec')
+require('tests.unit.trail.policies.always_spec')
+require('tests.unit.trail.policies.distance_spec')
+require('tests.unit.trail.policies.never_spec')
 
 require('tests.unit.performance_spec')
 
