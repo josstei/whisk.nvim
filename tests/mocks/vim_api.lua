@@ -12,6 +12,10 @@ local state = {
   window_buffers = {},
   augroups = {},
   augroup_id = 0,
+  namespaces = {},
+  namespace_id = 0,
+  extmarks = {},
+  highlights = {},
 }
 
 function M.reset()
@@ -27,6 +31,10 @@ function M.reset()
     window_buffers = {},
     augroups = {},
     augroup_id = 0,
+    namespaces = {},
+    namespace_id = 0,
+    extmarks = {},
+    highlights = {},
   }
 end
 
@@ -61,6 +69,18 @@ end
 
 function M.set_window_buffer(winid, bufnr)
   state.window_buffers[winid] = bufnr
+end
+
+function M.get_extmarks(ns_id)
+  return state.extmarks[ns_id] or {}
+end
+
+function M.get_highlights()
+  return state.highlights
+end
+
+function M.get_namespaces()
+  return state.namespaces
 end
 
 function M.create()
@@ -169,6 +189,42 @@ function M.create()
           table.remove(state.autocmds, i)
         end
       end
+    end,
+
+    nvim_create_namespace = function(name)
+      if state.namespaces[name] then
+        return state.namespaces[name]
+      end
+      state.namespace_id = state.namespace_id + 1
+      state.namespaces[name] = state.namespace_id
+      return state.namespace_id
+    end,
+
+    nvim_buf_set_extmark = function(bufnr, ns_id, line, col, opts)
+      if not state.extmarks[ns_id] then
+        state.extmarks[ns_id] = {}
+      end
+      local mark = { bufnr = bufnr, line = line, col = col, opts = opts or {} }
+      table.insert(state.extmarks[ns_id], mark)
+      return #state.extmarks[ns_id]
+    end,
+
+    nvim_buf_clear_namespace = function(bufnr, ns_id, line_start, line_end)
+      if state.extmarks[ns_id] then
+        state.extmarks[ns_id] = {}
+      end
+    end,
+
+    nvim_set_hl = function(ns, name, val)
+      state.highlights[name] = { ns = ns, val = val }
+    end,
+
+    nvim_get_hl = function(ns, opts)
+      local name = opts and opts.name
+      if name and state.highlights[name] then
+        return state.highlights[name].val or {}
+      end
+      return {}
     end,
   }
 end

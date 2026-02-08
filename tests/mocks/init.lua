@@ -116,4 +116,16 @@ function M.set_window_buffer(winid, bufnr)
   vim_api.set_window_buffer(winid, bufnr)
 end
 
+function M.get_extmarks(ns_id)
+  return vim_api.get_extmarks(ns_id)
+end
+
+function M.get_highlights()
+  return vim_api.get_highlights()
+end
+
+function M.get_namespaces()
+  return vim_api.get_namespaces()
+end
+
 return M
