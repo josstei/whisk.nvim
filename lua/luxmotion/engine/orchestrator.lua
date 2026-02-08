@@ -38,6 +38,7 @@ function M.execute(motion_id, input)
   end
 
   local context = context_builder.build(input)
+  context.category = motion.category
   local result = motion.calculator(context)
 
   if not result then

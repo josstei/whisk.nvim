@@ -189,6 +189,27 @@ describe('engine/orchestrator', function()
     assert.is_true(traits.is_animating('cursor'))
   end)
 
+  it('execute sets category on context', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { enabled = true } })
+
+    local received_category = nil
+    motions.register({
+      id = 'test_cat',
+      keys = { 'x' },
+      modes = { 'n' },
+      traits = { 'cursor' },
+      category = 'cursor',
+      calculator = function(ctx)
+        received_category = ctx.category
+        return { cursor = { line = 2, col = 0 } }
+      end,
+    })
+
+    orchestrator.execute('test_cat', { count = 1 })
+    assert.equals(received_category, 'cursor')
+  end)
+
   it('execute calls trait on_start before animation', function()
     local config = require('luxmotion.config')
     config.update({ cursor = { enabled = true } })
