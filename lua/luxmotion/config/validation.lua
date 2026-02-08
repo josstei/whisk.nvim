@@ -7,6 +7,28 @@ local valid_easing_types = {
   ["ease-in-out"] = true,
 }
 
+local function validate_trail(trail, category_name)
+  if not trail then
+    return
+  end
+
+  if trail.enabled ~= nil and type(trail.enabled) ~= "boolean" then
+    error(category_name .. ".trail.enabled must be a boolean")
+  end
+
+  if trail.color ~= nil then
+    if type(trail.color) ~= "string" or not trail.color:match("^#%x%x%x%x%x%x$") then
+      error(category_name .. ".trail.color must be a 6-digit hex string (e.g. '#FF0000')")
+    end
+  end
+
+  if trail.segments ~= nil then
+    if type(trail.segments) ~= "number" or trail.segments ~= math.floor(trail.segments) or trail.segments < 2 or trail.segments > 12 then
+      error(category_name .. ".trail.segments must be an integer between 2 and 12")
+    end
+  end
+end
+
 function M.validate_config(config)
   if not config then
     return true
@@ -24,6 +46,8 @@ function M.validate_config(config)
     if config.cursor.enabled and type(config.cursor.enabled) ~= "boolean" then
       error("cursor.enabled must be a boolean")
     end
+
+    validate_trail(config.cursor.trail, "cursor")
   end
   
   if config.scroll then
@@ -38,6 +62,8 @@ function M.validate_config(config)
     if config.scroll.enabled and type(config.scroll.enabled) ~= "boolean" then
       error("scroll.enabled must be a boolean")
     end
+
+    validate_trail(config.scroll.trail, "scroll")
   end
   
   if config.keymaps then

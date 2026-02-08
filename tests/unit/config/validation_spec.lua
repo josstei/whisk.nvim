@@ -197,4 +197,110 @@ describe('config/validation', function()
       validation.validate_config(config)
     end)
   end)
+
+  it('accepts valid cursor trail config', function()
+    local config = {
+      cursor = {
+        trail = { enabled = true, color = '#FF0000', segments = 4 },
+      },
+    }
+    assert.does_not_throw(function()
+      validation.validate_config(config)
+    end)
+  end)
+
+  it('accepts valid scroll trail config', function()
+    local config = {
+      scroll = {
+        trail = { enabled = false, color = '#00FF00', segments = 8 },
+      },
+    }
+    assert.does_not_throw(function()
+      validation.validate_config(config)
+    end)
+  end)
+
+  it('rejects non-boolean trail.enabled', function()
+    local config = {
+      cursor = { trail = { enabled = 'yes' } },
+    }
+    assert.throws(function()
+      validation.validate_config(config)
+    end, 'trail.enabled')
+  end)
+
+  it('rejects invalid trail.color format', function()
+    local config = {
+      cursor = { trail = { color = 'red' } },
+    }
+    assert.throws(function()
+      validation.validate_config(config)
+    end, 'trail.color')
+  end)
+
+  it('rejects trail.color without hash prefix', function()
+    local config = {
+      cursor = { trail = { color = 'FF0000' } },
+    }
+    assert.throws(function()
+      validation.validate_config(config)
+    end, 'trail.color')
+  end)
+
+  it('rejects non-integer trail.segments', function()
+    local config = {
+      cursor = { trail = { segments = 3.5 } },
+    }
+    assert.throws(function()
+      validation.validate_config(config)
+    end, 'trail.segments')
+  end)
+
+  it('rejects trail.segments below minimum', function()
+    local config = {
+      cursor = { trail = { segments = 1 } },
+    }
+    assert.throws(function()
+      validation.validate_config(config)
+    end, 'trail.segments')
+  end)
+
+  it('rejects trail.segments above maximum', function()
+    local config = {
+      cursor = { trail = { segments = 13 } },
+    }
+    assert.throws(function()
+      validation.validate_config(config)
+    end, 'trail.segments')
+  end)
+
+  it('accepts trail.segments at boundaries', function()
+    assert.does_not_throw(function()
+      validation.validate_config({ cursor = { trail = { segments = 2 } } })
+    end)
+    assert.does_not_throw(function()
+      validation.validate_config({ cursor = { trail = { segments = 12 } } })
+    end)
+  end)
+
+  it('accepts partial trail config', function()
+    local config = {
+      cursor = { trail = { enabled = false } },
+    }
+    assert.does_not_throw(function()
+      validation.validate_config(config)
+    end)
+  end)
+
+  it('validates scroll trail same as cursor trail', function()
+    assert.throws(function()
+      validation.validate_config({ scroll = { trail = { enabled = 'no' } } })
+    end, 'trail.enabled')
+    assert.throws(function()
+      validation.validate_config({ scroll = { trail = { color = 123 } } })
+    end, 'trail.color')
+    assert.throws(function()
+      validation.validate_config({ scroll = { trail = { segments = 0 } } })
+    end, 'trail.segments')
+  end)
 end)
