@@ -1,6 +1,9 @@
 local M = {}
 
-local intensities = { 0.90, 0.72, 0.54, 0.36, 0.18, 0.06 }
+local function compute_intensity(index, total)
+  local t = (index - 1) / (total - 1)
+  return 0.90 * (1.0 - t) * (1.0 - t)
+end
 
 function M.parse_hex(hex)
   local r = tonumber(hex:sub(2, 3), 16)
@@ -31,7 +34,7 @@ end
 
 function M.setup(trail_color, bg_color, segments)
   for i = 1, segments do
-    local intensity = intensities[i] or (1.0 - (i - 1) / segments)
+    local intensity = compute_intensity(i, segments)
     local blended = M.blend_hex(trail_color, bg_color, intensity)
     vim.api.nvim_set_hl(0, M.get_group_name(i), { bg = blended })
   end
