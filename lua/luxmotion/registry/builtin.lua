@@ -34,9 +34,24 @@ function M.register_traits()
   local trail_enabled = (cursor_trail and cursor_trail.enabled) or (scroll_trail and scroll_trail.enabled)
 
   if trail_enabled then
+    local policies = require("luxmotion.trail.policies")
+    local always_policy = require("luxmotion.trail.policies.always")
+    local never_policy = require("luxmotion.trail.policies.never")
+    local distance_policy = require("luxmotion.trail.policies.distance")
+
+    policies.clear()
+    policies.register(always_policy)
+    policies.register(never_policy)
+
+    local distance_config = (cursor_trail and cursor_trail.distance) or { min_lines = 2, min_cols = 5 }
+    policies.register(distance_policy.create(distance_config))
+
     traits.register({
       id = "trail",
       apply = function(context, result, progress)
+        if not context.trail_active then
+          return
+        end
         local category_config = config.get(context.category or "cursor")
         local trail = category_config and category_config.trail
         if not trail then
@@ -45,10 +60,18 @@ function M.register_traits()
         renderer.push_position(context.bufnr, result, trail.segments)
         renderer.render(context.bufnr, trail.segments)
       end,
-      on_start = function(context)
-        renderer.reset()
+      on_start = function(context, result)
+        local policies = require("luxmotion.trail.policies")
+        local policy = policies.resolve(context.motion_id)
+        context.trail_active = policy.should_trail(context, result)
+        if context.trail_active then
+          renderer.reset()
+        end
       end,
       on_complete = function(context)
+        if not context.trail_active then
+          return
+        end
         if context and context.bufnr then
           renderer.clear(context.bufnr)
         else

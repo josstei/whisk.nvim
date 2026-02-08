@@ -400,4 +400,17 @@ describe('registry/builtin', function()
       assert.equals(motion.trail_policy, 'always', id .. ' should have always policy')
     end
   end)
+
+  it('register_traits registers built-in policies', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { trail = { enabled = true } } })
+
+    traits.clear()
+    builtin.register_traits()
+
+    local policies = require('luxmotion.trail.policies')
+    assert.is_not_nil(policies.get('always'))
+    assert.is_not_nil(policies.get('never'))
+    assert.is_not_nil(policies.get('distance'))
+  end)
 end)
