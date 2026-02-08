@@ -5,11 +5,21 @@ M.config = {
     duration = 150,
     easing = "ease-out",
     enabled = true,
+    trail = {
+      enabled = true,
+      color = "#E8A84C",
+      segments = 6,
+    },
   },
   scroll = {
     duration = 200,
     easing = "ease-in-out",
     enabled = true,
+    trail = {
+      enabled = false,
+      color = "#E8A84C",
+      segments = 6,
+    },
   },
   keymaps = {
     cursor = true,
