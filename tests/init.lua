@@ -38,6 +38,8 @@ require('tests.unit.calculators.search_spec')
 
 require('tests.unit.utils.visual_spec')
 
+require('tests.unit.trail.highlights_spec')
+
 require('tests.unit.performance_spec')
 
 require('tests.unit.shims.cursor_keymaps_spec')
