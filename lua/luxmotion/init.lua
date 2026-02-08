@@ -5,6 +5,7 @@ local traits = require("luxmotion.registry.traits")
 local motions = require("luxmotion.registry.motions")
 local loop = require("luxmotion.engine.loop")
 local lifecycle = require("luxmotion.engine.lifecycle")
+local trail_highlights = require("luxmotion.trail.highlights")
 
 local M = {}
 
@@ -21,6 +22,31 @@ function M.setup(user_config)
   local performance = require("luxmotion.performance")
   performance.setup()
 
+  local cursor_cfg = config.get("cursor")
+  local scroll_cfg = config.get("scroll")
+
+  local bg_color = '#1E1E2E'
+  local hl_ok, normal_hl = pcall(vim.api.nvim_get_hl, 0, { name = 'Normal' })
+  if hl_ok and normal_hl and normal_hl.bg then
+    bg_color = trail_highlights.to_hex(
+      math.floor(normal_hl.bg / 65536) % 256,
+      math.floor(normal_hl.bg / 256) % 256,
+      normal_hl.bg % 256
+    )
+  end
+
+  if cursor_cfg.trail and cursor_cfg.trail.enabled then
+    trail_highlights.setup(cursor_cfg.trail.color, bg_color, cursor_cfg.trail.segments)
+  end
+
+  if scroll_cfg.trail and scroll_cfg.trail.enabled then
+    local scroll_segments = scroll_cfg.trail.segments
+    if cursor_cfg.trail and cursor_cfg.trail.enabled and cursor_cfg.trail.segments >= scroll_segments then
+    else
+      trail_highlights.setup(scroll_cfg.trail.color, bg_color, scroll_segments)
+    end
+  end
+
   builtin.register_all()
   keymaps.setup()
   lifecycle.setup()
@@ -31,6 +57,7 @@ end
 function M.reset()
   keymaps.clear()
   loop.stop_all()
+  trail_highlights.teardown()
   traits.clear()
   motions.clear()
   lifecycle.teardown()

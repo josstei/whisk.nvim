@@ -223,4 +223,39 @@ describe('init (main module)', function()
     luxmotion.reset()
     assert.is_false(lifecycle.is_active())
   end)
+
+  it('setup creates trail highlight groups when cursor trail enabled', function()
+    luxmotion.setup({
+      cursor = { trail = { enabled = true, color = '#FF0000', segments = 4 } },
+    })
+    local hl_state = mocks.get_highlights()
+    assert.is_not_nil(hl_state['LuxMotionTrail1'])
+    assert.is_not_nil(hl_state['LuxMotionTrail4'])
+  end)
+
+  it('setup registers trail trait when trail enabled', function()
+    luxmotion.setup({
+      cursor = { trail = { enabled = true } },
+    })
+    local traits = require('luxmotion.registry.traits')
+    assert.is_not_nil(traits.get('trail'))
+  end)
+
+  it('setup skips trail trait when trail disabled', function()
+    luxmotion.setup({
+      cursor = { trail = { enabled = false } },
+      scroll = { trail = { enabled = false } },
+    })
+    local traits = require('luxmotion.registry.traits')
+    assert.is_nil(traits.get('trail'))
+  end)
+
+  it('setup with trail config in user config works', function()
+    assert.does_not_throw(function()
+      luxmotion.setup({
+        cursor = { trail = { enabled = true, color = '#00FF00', segments = 8 } },
+        scroll = { trail = { enabled = true, color = '#0000FF', segments = 3 } },
+      })
+    end)
+  end)
 end)
