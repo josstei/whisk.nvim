@@ -10,6 +10,10 @@ describe('trail/renderer', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
+    mocks.set_buffer_content({
+      "line 1", "line 2", "line 3", "line 4", "line 5",
+      "line 6", "line 7", "line 8", "line 9", "line 10",
+    })
     renderer = require('luxmotion.trail.renderer')
   end)
 

@@ -46,16 +46,34 @@ function M.render(bufnr, segments)
   local ns = M.get_namespace_id()
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
+  local line_count = vim.api.nvim_buf_line_count(bufnr)
+
   for i, pos in ipairs(positions) do
     if i > segments then
       break
     end
 
+    local row = pos.line - 1
+    if row < 0 or row >= line_count then
+      goto continue
+    end
+
+    local line_text = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ""
+    local line_len = #line_text
+    local col = math.min(pos.col, math.max(0, line_len - 1))
+    local end_col = math.min(col + 1, line_len)
+
+    if end_col <= col then
+      goto continue
+    end
+
     local hl_group = highlights.get_group_name(i)
-    vim.api.nvim_buf_set_extmark(bufnr, ns, pos.line - 1, pos.col, {
-      end_col = pos.col + 1,
+    pcall(vim.api.nvim_buf_set_extmark, bufnr, ns, row, col, {
+      end_col = end_col,
       hl_group = hl_group,
     })
+
+    ::continue::
   end
 end
 
