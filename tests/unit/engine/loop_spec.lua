@@ -187,6 +187,77 @@ describe('engine/loop', function()
     })
   end)
 
+  it('exports complete_all function', function()
+    assert.is_type(loop.complete_all, 'function')
+  end)
+
+  it('complete_all snaps animations to final position', function()
+    local traits = require('luxmotion.registry.traits')
+    traits.register({
+      id = 'cursor',
+      apply = function(context, result, progress)
+        if result.cursor then
+          mocks.set_cursor(result.cursor.line, result.cursor.col)
+        end
+      end,
+    })
+
+    loop.start({
+      duration = 150,
+      easing = 'linear',
+      context = { cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = { 'cursor' },
+      on_complete = function() end,
+    })
+
+    assert.is_true(loop.is_running())
+    loop.complete_all()
+    assert.is_false(loop.is_running())
+    assert.equals(loop.get_active_count(), 0)
+
+    local cursor = mocks.get_cursor()
+    assert.equals(cursor[1], 5)
+    assert.equals(cursor[2], 0)
+  end)
+
+  it('complete_all calls on_complete callback', function()
+    local completed = false
+
+    loop.start({
+      duration = 150,
+      easing = 'linear',
+      context = { cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 3, col = 0 } },
+      traits = {},
+      on_complete = function()
+        completed = true
+      end,
+    })
+
+    loop.complete_all()
+    assert.is_true(completed)
+  end)
+
+  it('complete_all does not call on_cancel callback', function()
+    local cancelled = false
+
+    loop.start({
+      duration = 150,
+      easing = 'linear',
+      context = { cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 3, col = 0 } },
+      traits = {},
+      on_complete = function() end,
+      on_cancel = function()
+        cancelled = true
+      end,
+    })
+
+    loop.complete_all()
+    assert.is_false(cancelled)
+  end)
+
   it('exports cancel_for_buffer function', function()
     assert.is_type(loop.cancel_for_buffer, 'function')
   end)

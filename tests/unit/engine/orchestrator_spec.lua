@@ -188,4 +188,21 @@ describe('engine/orchestrator', function()
     orchestrator.execute('test_j', { count = 1 })
     assert.is_true(traits.is_animating('cursor'))
   end)
+
+  it('execute completes previous animation before starting new one (key repeat)', function()
+    local config = require('luxmotion.config')
+    config.update({ cursor = { enabled = true } })
+
+    orchestrator.execute('test_j', { count = 1 })
+    assert.is_true(loop.is_running())
+
+    local cursor_after_first = mocks.get_cursor()
+    assert.equals(cursor_after_first[1], 1)
+
+    orchestrator.execute('test_j', { count = 1 })
+
+    local cursor_after_second = mocks.get_cursor()
+    assert.equals(cursor_after_second[1], 2)
+    assert.is_true(loop.is_running())
+  end)
 end)

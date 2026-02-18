@@ -34,7 +34,7 @@ function M.execute(motion_id, input)
   end
 
   if dominated then
-    loop.stop_all()
+    loop.complete_all()
   end
 
   local context = context_builder.build(input)
