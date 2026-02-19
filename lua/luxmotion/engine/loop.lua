@@ -117,6 +117,22 @@ function M.stop_all()
   is_running = false
 end
 
+function M.complete_all()
+  for _, anim in ipairs(frame_queue) do
+    local eased_final = anim.easing_fn(1.0)
+    local final = interpolate_result(anim.context, anim.result, eased_final)
+    for _, trait_id in ipairs(anim.traits) do
+      traits.apply_frame(trait_id, anim.context, final, eased_final)
+    end
+    if anim.on_complete then
+      anim.on_complete()
+    end
+    pool.release(anim)
+  end
+  frame_queue = {}
+  is_running = false
+end
+
 function M.cancel_for_buffer(bufnr)
   for i = #frame_queue, 1, -1 do
     local anim = frame_queue[i]
