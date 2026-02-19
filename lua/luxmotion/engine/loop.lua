@@ -119,9 +119,10 @@ end
 
 function M.complete_all()
   for _, anim in ipairs(frame_queue) do
-    local final = interpolate_result(anim.context, anim.result, 1.0)
+    local eased_final = anim.easing_fn(1.0)
+    local final = interpolate_result(anim.context, anim.result, eased_final)
     for _, trait_id in ipairs(anim.traits) do
-      traits.apply_frame(trait_id, anim.context, final, 1.0)
+      traits.apply_frame(trait_id, anim.context, final, eased_final)
     end
     if anim.on_complete then
       anim.on_complete()

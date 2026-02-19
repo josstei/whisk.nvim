@@ -29,7 +29,6 @@ function M.execute(motion_id, input)
   for _, trait_id in ipairs(motion.traits) do
     if traits.is_animating(trait_id) then
       dominated = true
-      traits.set_animating(trait_id, false)
     end
   end
 

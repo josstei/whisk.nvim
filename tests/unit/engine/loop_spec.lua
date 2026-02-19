@@ -21,6 +21,7 @@ describe('engine/loop', function()
   it('exports all required functions', function()
     assert.is_type(loop.start, 'function')
     assert.is_type(loop.stop_all, 'function')
+    assert.is_type(loop.complete_all, 'function')
     assert.is_type(loop.get_easing, 'function')
     assert.is_type(loop.get_active_count, 'function')
     assert.is_type(loop.is_running, 'function')
@@ -256,6 +257,42 @@ describe('engine/loop', function()
 
     loop.complete_all()
     assert.is_false(cancelled)
+  end)
+
+  it('complete_all on empty queue does not crash', function()
+    assert.does_not_throw(function()
+      loop.complete_all()
+    end)
+    assert.is_false(loop.is_running())
+    assert.equals(loop.get_active_count(), 0)
+  end)
+
+  it('complete_all processes all queued animations', function()
+    local call_count = 0
+
+    loop.start({
+      duration = 150,
+      easing = 'linear',
+      context = { cursor = { line = 1, col = 0 } },
+      result = { cursor = { line = 5, col = 0 } },
+      traits = {},
+      on_complete = function() call_count = call_count + 1 end,
+    })
+
+    loop.start({
+      duration = 150,
+      easing = 'linear',
+      context = { viewport = { topline = 1 } },
+      result = { viewport = { topline = 10 } },
+      traits = {},
+      on_complete = function() call_count = call_count + 1 end,
+    })
+
+    assert.equals(loop.get_active_count(), 2)
+    loop.complete_all()
+    assert.equals(call_count, 2)
+    assert.equals(loop.get_active_count(), 0)
+    assert.is_false(loop.is_running())
   end)
 
   it('exports cancel_for_buffer function', function()
