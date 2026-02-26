@@ -10,7 +10,7 @@ describe('config/management', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    management = require('luxmotion.config.management')
+    management = require('whisk.config.management')
     management.reset()
   end)
 

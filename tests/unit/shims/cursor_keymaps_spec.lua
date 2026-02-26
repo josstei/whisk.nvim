@@ -13,14 +13,14 @@ describe('cursor/keymaps (shims)', function()
     mocks.clear_package_cache()
     orchestrator_calls = {}
 
-    package.loaded['luxmotion.engine.orchestrator'] = {
+    package.loaded['whisk.engine.orchestrator'] = {
       execute = function(motion_id, input)
         table.insert(orchestrator_calls, { motion_id = motion_id, input = input })
       end,
       fallback = function() end,
     }
 
-    cursor_keymaps = require('luxmotion.cursor.keymaps')
+    cursor_keymaps = require('whisk.cursor.keymaps')
   end)
 
   it('exports deprecated functions', function()

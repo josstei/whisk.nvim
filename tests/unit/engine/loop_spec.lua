@@ -10,7 +10,7 @@ describe('engine/loop', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    loop = require('luxmotion.engine.loop')
+    loop = require('whisk.engine.loop')
     loop.stop_all()
   end)
 
@@ -193,7 +193,7 @@ describe('engine/loop', function()
   end)
 
   it('complete_all snaps animations to final position', function()
-    local traits = require('luxmotion.registry.traits')
+    local traits = require('whisk.registry.traits')
     traits.register({
       id = 'cursor',
       apply = function(context, result, progress)

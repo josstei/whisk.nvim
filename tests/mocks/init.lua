@@ -98,7 +98,7 @@ end
 
 function M.clear_package_cache()
   for name, _ in pairs(package.loaded) do
-    if name:match('^luxmotion') then
+    if name:match('^whisk') then
       package.loaded[name] = nil
     end
   end

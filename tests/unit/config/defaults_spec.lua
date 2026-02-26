@@ -10,7 +10,7 @@ describe('config/defaults', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    defaults = require('luxmotion.config.defaults')
+    defaults = require('whisk.config.defaults')
   end)
 
   it('exports a config table', function()

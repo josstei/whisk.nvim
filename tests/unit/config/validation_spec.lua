@@ -10,7 +10,7 @@ describe('config/validation', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    validation = require('luxmotion.config.validation')
+    validation = require('whisk.config.validation')
   end)
 
   it('exports validate_config function', function()

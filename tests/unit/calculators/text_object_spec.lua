@@ -22,7 +22,7 @@ describe('calculators/text_object', function()
       "{some text in braces}",
     })
     mocks.set_cursor(3, 0)
-    text_object = require('luxmotion.calculators.text_object')
+    text_object = require('whisk.calculators.text_object')
   end)
 
   it('exports {, }, (, ), % functions', function()

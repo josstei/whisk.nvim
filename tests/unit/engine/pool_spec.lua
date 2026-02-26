@@ -10,7 +10,7 @@ describe('engine/pool', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    pool = require('luxmotion.engine.pool')
+    pool = require('whisk.engine.pool')
     pool.clear()
   end)
 

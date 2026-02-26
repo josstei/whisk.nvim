@@ -20,7 +20,7 @@ describe('context/Context', function()
     mocks.set_cursor(1, 0)
     mocks.set_window_size(40, 120)
     mocks.set_topline(1)
-    Context = require('luxmotion.context.Context')
+    Context = require('whisk.context.Context')
   end)
 
   it('new() creates a Context with bufnr and winid', function()

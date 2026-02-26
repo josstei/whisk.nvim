@@ -16,7 +16,7 @@ describe('calculators/word', function()
       "third_word another-word",
     })
     mocks.set_cursor(1, 0)
-    word = require('luxmotion.calculators.word')
+    word = require('whisk.calculators.word')
   end)
 
   it('exports w, b, e, W, B, E functions', function()

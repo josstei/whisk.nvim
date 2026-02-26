@@ -25,7 +25,7 @@ describe('calculators/line', function()
     mocks.set_cursor(5, 3)
     mocks.set_window_size(40, 120)
     mocks.set_topline(1)
-    line = require('luxmotion.calculators.line')
+    line = require('whisk.calculators.line')
   end)
 
   it('exports gg, G, | functions', function()
