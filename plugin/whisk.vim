@@ -1,25 +1,25 @@
-if exists('g:loaded_luxmotion')
+if exists('g:loaded_whisk')
   finish
 endif
-let g:loaded_luxmotion = 1
+let g:loaded_whisk = 1
 
-command! LuxMotionEnable lua require('luxmotion').enable()
-command! LuxMotionDisable lua require('luxmotion').disable()
-command! LuxMotionToggle lua require('luxmotion').toggle()
+command! WhiskEnable lua require('whisk').enable()
+command! WhiskDisable lua require('whisk').disable()
+command! WhiskToggle lua require('whisk').toggle()
 
-command! LuxMotionEnableCursor lua require('luxmotion').enable_cursor()
-command! LuxMotionDisableCursor lua require('luxmotion').disable_cursor()
-command! LuxMotionEnableScroll lua require('luxmotion').enable_scroll()
-command! LuxMotionDisableScroll lua require('luxmotion').disable_scroll()
+command! WhiskEnableCursor lua require('whisk').enable_cursor()
+command! WhiskDisableCursor lua require('whisk').disable_cursor()
+command! WhiskEnableScroll lua require('whisk').enable_scroll()
+command! WhiskDisableScroll lua require('whisk').disable_scroll()
 
-command! LuxMotionPerformanceEnable lua require('luxmotion.performance').enable()
-command! LuxMotionPerformanceDisable lua require('luxmotion.performance').disable()
-command! LuxMotionPerformanceToggle lua require('luxmotion').toggle_performance()
+command! WhiskPerformanceEnable lua require('whisk.performance').enable()
+command! WhiskPerformanceDisable lua require('whisk.performance').disable()
+command! WhiskPerformanceToggle lua require('whisk').toggle_performance()
 
-if !exists('g:luxmotion_auto_setup')
-  let g:luxmotion_auto_setup = 1
+if !exists('g:whisk_auto_setup')
+  let g:whisk_auto_setup = 1
 endif
 
-if g:luxmotion_auto_setup
-  lua require('luxmotion').setup()
+if g:whisk_auto_setup
+  lua require('whisk').setup()
 endif
