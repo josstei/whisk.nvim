@@ -19,7 +19,7 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 | Screen Lines | `gj`, `gk` |
 | Viewport | `<C-d>`, `<C-u>`, `<C-f>`, `<C-b>`, `zz`, `zt`, `zb` |
 
-- Works in Normal and Visual modes with count prefixes
+- Works in Normal and Visual modes with count prefixes (position motions `zz`/`zt`/`zb` are Normal mode only)
 - Separate duration and easing for cursor vs scroll animations
 - Performance mode with automatic large file detection
 - Object pooling to minimize garbage collection
@@ -146,7 +146,8 @@ orchestrator.execute("find_f", { char = "x", count = 1, direction = "f" })
 | Find | `find_f`, `find_F`, `find_t`, `find_T` |
 | Text Object | `text_object_{`, `text_object_}`, `text_object_(`, `text_object_)`, `text_object_%` |
 | Line | `line_gg`, `line_G`, `line_\|` |
-| Search | `search_n`, `search_N`, `screen_gj`, `screen_gk` |
+| Search | `search_n`, `search_N` |
+| Screen | `screen_gj`, `screen_gk` |
 | Scroll | `scroll_ctrl_d`, `scroll_ctrl_u`, `scroll_ctrl_f`, `scroll_ctrl_b`, `position_zz`, `position_zt`, `position_zb` |
 
 ---

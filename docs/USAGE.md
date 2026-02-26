@@ -180,7 +180,8 @@ orchestrator.execute("scroll_ctrl_d", { count = 1, direction = "<C-d>" })
 | Find | `find_f`, `find_F`, `find_t`, `find_T` |
 | Text Object | `text_object_{`, `text_object_}`, `text_object_(`, `text_object_)`, `text_object_%` |
 | Line | `line_gg`, `line_G`, `line_\|` |
-| Search | `search_n`, `search_N`, `screen_gj`, `screen_gk` |
+| Search | `search_n`, `search_N` |
+| Screen | `screen_gj`, `screen_gk` |
 | Scroll | `scroll_ctrl_d`, `scroll_ctrl_u`, `scroll_ctrl_f`, `scroll_ctrl_b`, `position_zz`, `position_zt`, `position_zb` |
 
 ---

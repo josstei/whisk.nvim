@@ -175,8 +175,9 @@ Each frame:
 5. Applies the easing function to get `eased` progress.
 6. Calls `interpolate_result()` to lerp cursor line/col and viewport topline between start and target.
 7. Calls `traits.apply_frame()` for each trait.
-8. When `progress >= 1.0`: fires `on_complete`, removes from queue, releases animation object to pool.
-9. Reschedules itself if the queue is non-empty; otherwise stops.
+8. If context validation fails, fires `on_cancel` with a reason string and removes the animation.
+9. When `progress >= 1.0`: fires `on_complete`, removes from queue, releases animation object to pool.
+10. Reschedules itself if the queue is non-empty; otherwise stops.
 
 Frame interval is determined by `performance.get_frame_interval()`: 16ms (~60fps) normally, 33ms (~30fps) with `reduce_frame_rate` enabled.
 
@@ -188,7 +189,7 @@ Recycles animation table allocations to reduce garbage collection pressure.
 
 - Maximum pool size: 10 objects.
 - `acquire()` returns a pooled object or allocates a new one.
-- `release(animation)` zeros all fields and returns the object to the pool if under capacity.
+- `release(animation)` resets all fields (numbers to 0, references to nil) and returns the object to the pool if under capacity.
 
 ### Lifecycle (`engine/lifecycle.lua`)
 
@@ -240,6 +241,7 @@ When enabled, performance mode:
 - Tracks ignored events (`WinScrolled`, `CursorMoved`, `CursorMovedI`).
 - Auto-enables on `BufEnter`/`BufWinEnter` for files exceeding `large_file_threshold` lines.
 - Maintains a rolling window of the last 10 frame times for FPS calculation.
+- Exposes `get_frame_interval()` and `get_current_fps()` for introspection.
 
 ---
 
