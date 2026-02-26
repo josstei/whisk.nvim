@@ -1,17 +1,17 @@
-# LuxMotion Usage
+# Whisk Usage
 
-LuxMotion is a smooth motion plugin for Neovim. It wraps standard motion commands with animated cursor/scroll transitions while preserving Vim's native behavior.
+Whisk is a smooth motion plugin for Neovim. It wraps standard motion commands with animated cursor/scroll transitions while preserving Vim's native behavior.
 
 ## Quick start
 
 ### Installation
 
-Use your plugin manager of choice (lazy.nvim, packer.nvim, vim-plug, etc.). The plugin auto-calls `require("luxmotion").setup()` by default on startup.
+Use your plugin manager of choice (lazy.nvim, packer.nvim, vim-plug, etc.). The plugin auto-calls `require("whisk").setup()` by default on startup.
 
 ### Minimal setup
 
 ```lua
-require("luxmotion").setup()
+require("whisk").setup()
 ```
 
 ### Disable auto-setup (optional)
@@ -19,17 +19,17 @@ require("luxmotion").setup()
 The Vimscript entrypoint calls setup automatically unless you disable it:
 
 ```vim
-let g:luxmotion_auto_setup = 0
+let g:whisk_auto_setup = 0
 ```
 
-Then call `require("luxmotion").setup()` yourself after loading the plugin.
+Then call `require("whisk").setup()` yourself after loading the plugin.
 
 ## Configuration
 
-All configuration is passed to `require("luxmotion").setup({...})`.
+All configuration is passed to `require("whisk").setup({...})`.
 
 ```lua
-require("luxmotion").setup({
+require("whisk").setup({
   cursor = {
     duration = 150,
     easing = "ease-out",
@@ -76,35 +76,35 @@ require("luxmotion").setup({
 
 ## Commands
 
-- `:LuxMotionEnable` / `:LuxMotionDisable` / `:LuxMotionToggle`
-- `:LuxMotionEnableCursor` / `:LuxMotionDisableCursor`
-- `:LuxMotionEnableScroll` / `:LuxMotionDisableScroll`
-- `:LuxMotionPerformanceEnable` / `:LuxMotionPerformanceDisable` / `:LuxMotionPerformanceToggle`
+- `:WhiskEnable` / `:WhiskDisable` / `:WhiskToggle`
+- `:WhiskEnableCursor` / `:WhiskDisableCursor`
+- `:WhiskEnableScroll` / `:WhiskDisableScroll`
+- `:WhiskPerformanceEnable` / `:WhiskPerformanceDisable` / `:WhiskPerformanceToggle`
 
 ## Lua API
 
 ```lua
-local luxmotion = require("luxmotion")
+local whisk = require("whisk")
 
-luxmotion.setup({})
+whisk.setup({})
 
-luxmotion.enable()
-luxmotion.disable()
-luxmotion.toggle()
+whisk.enable()
+whisk.disable()
+whisk.toggle()
 
-luxmotion.enable_cursor()
-luxmotion.disable_cursor()
+whisk.enable_cursor()
+whisk.disable_cursor()
 
-luxmotion.enable_scroll()
-luxmotion.disable_scroll()
+whisk.enable_scroll()
+whisk.disable_scroll()
 
-luxmotion.toggle_performance()
+whisk.toggle_performance()
 ```
 
 Performance module:
 
 ```lua
-local performance = require("luxmotion.performance")
+local performance = require("whisk.performance")
 
 performance.enable()
 performance.disable()
@@ -117,7 +117,7 @@ performance.get_current_fps()
 If you want custom mappings or to trigger motions manually, use the orchestrator:
 
 ```lua
-local orchestrator = require("luxmotion.engine.orchestrator")
+local orchestrator = require("whisk.engine.orchestrator")
 
 orchestrator.execute("basic_j", { count = 5, direction = "j" })
 orchestrator.execute("word_w", { count = 2, direction = "w" })
@@ -142,11 +142,11 @@ Categories and examples:
 To disable default mappings and provide your own:
 
 ```lua
-require("luxmotion").setup({
+require("whisk").setup({
   keymaps = { cursor = false, scroll = false },
 })
 
-local orchestrator = require("luxmotion.engine.orchestrator")
+local orchestrator = require("whisk.engine.orchestrator")
 
 vim.keymap.set("n", "j", function()
   orchestrator.execute("basic_j", { count = vim.v.count1, direction = "j" })
@@ -155,13 +155,13 @@ end, { silent = true })
 
 ## Behavior notes
 
-- If a motion category is disabled, LuxMotion falls back to native `normal!` motion behavior.
+- If a motion category is disabled, Whisk falls back to native `normal!` motion behavior.
 - Several calculators use native motions to compute accurate targets, then restore the cursor before animating.
 - Visual mode is supported for motions registered with `modes = { "n", "v" }`.
 
 ## Deprecated APIs
 
-`luxmotion.cursor.keymaps` and `luxmotion.scroll.keymaps` are deprecated. Use `luxmotion.engine.orchestrator` for custom mappings.
+`whisk.cursor.keymaps` and `whisk.scroll.keymaps` are deprecated. Use `whisk.engine.orchestrator` for custom mappings.
 
 ## Compatibility
 

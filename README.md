@@ -2,10 +2,10 @@
   <img src="https://github.com/user-attachments/assets/546ee0e5-30fd-4e37-b219-e390be8b1c6e"
        alt="LuxVim Logo"
        style="width: 40px; height: 40px; position: relative; top: 6px; margin-right: 10px;" />
-  nvim-luxmotion
+  whisk.nvim
 </h1>
 
-A comprehensive **Neovim smooth motion plugin**, providing **fluid animations for all motion commands**.  
+A comprehensive **Neovim smooth motion plugin**, providing **fluid animations for all motion commands**.
 Combines smooth **cursor movement**, **word navigation**, **text objects**, and **viewport scrolling** into one seamless experience.
 
 ---
@@ -47,8 +47,8 @@ Combines smooth **cursor movement**, **word navigation**, **text objects**, and 
 
 - **Comprehensive Command & API Support**
   - Commands:
-    - `:LuxMotionEnable` / `:LuxMotionDisable` / `:LuxMotionToggle`
-    - `:LuxMotionPerformanceEnable` / `Disable` / `Toggle`
+    - `:WhiskEnable` / `:WhiskDisable` / `:WhiskToggle`
+    - `:WhiskPerformanceEnable` / `Disable` / `Toggle`
   - Lua API:
     - Enable/disable cursor and scroll animations
     - Toggle performance mode
@@ -77,9 +77,9 @@ Combines smooth **cursor movement**, **word navigation**, **text objects**, and 
 ### **Using lazy.nvim**
 ```lua
 {
-  "LuxVim/nvim-luxmotion",
+  "josstei/whisk.nvim",
   config = function()
-    require("luxmotion").setup({
+    require("whisk").setup({
       cursor = {
         duration = 150,
         easing = "ease-out",
@@ -103,22 +103,22 @@ Combines smooth **cursor movement**, **word navigation**, **text objects**, and 
 ### **Using packer.nvim**
 ```lua
 use {
-  "LuxVim/nvim-luxmotion",
+  "josstei/whisk.nvim",
   config = function()
-    require("luxmotion").setup()
+    require("whisk").setup()
   end
 }
 ```
 
 ### **Using vim-plug**
 ```vim
-Plug 'LuxVim/nvim-luxmotion'
+Plug 'josstei/whisk.nvim'
 ```
 
 Then in your `init.lua` or `init.vim`:
 ```lua
 lua << EOF
-require("luxmotion").setup()
+require("whisk").setup()
 EOF
 ```
 
@@ -127,7 +127,7 @@ EOF
 ## 🛠️ Configuration
 
 ```lua
-require("luxmotion").setup({
+require("whisk").setup({
   cursor = {
     duration = 150,       -- Cursor animation duration (ms)
     easing = "ease-out",  -- Cursor easing function
@@ -153,46 +153,46 @@ require("luxmotion").setup({
 ## 🎮 Commands
 
 ### **Global Controls**
-- `:LuxMotionEnable` – Enable all animations
-- `:LuxMotionDisable` – Disable all animations
-- `:LuxMotionToggle` – Toggle all animations
+- `:WhiskEnable` – Enable all animations
+- `:WhiskDisable` – Disable all animations
+- `:WhiskToggle` – Toggle all animations
 
 ### **Individual Controls**
-- `:LuxMotionEnableCursor` / `:LuxMotionDisableCursor`
-- `:LuxMotionEnableScroll` / `:LuxMotionDisableScroll`
+- `:WhiskEnableCursor` / `:WhiskDisableCursor`
+- `:WhiskEnableScroll` / `:WhiskDisableScroll`
 
 ### **Performance Mode**
-- `:LuxMotionPerformanceEnable`
-- `:LuxMotionPerformanceDisable`
-- `:LuxMotionPerformanceToggle`
+- `:WhiskPerformanceEnable`
+- `:WhiskPerformanceDisable`
+- `:WhiskPerformanceToggle`
 
 ---
 
 ## 🔧 Lua API
 
 ```lua
-local luxmotion = require("luxmotion")
+local whisk = require("whisk")
 
 -- Global control
-luxmotion.enable()
-luxmotion.disable()
-luxmotion.toggle()
+whisk.enable()
+whisk.disable()
+whisk.toggle()
 
 -- Individual controls
-luxmotion.enable_cursor()
-luxmotion.disable_cursor()
-luxmotion.enable_scroll()
-luxmotion.disable_scroll()
+whisk.enable_cursor()
+whisk.disable_cursor()
+whisk.enable_scroll()
+whisk.disable_scroll()
 
 -- Performance mode
-local performance = require("luxmotion.performance")
+local performance = require("whisk.performance")
 performance.enable()
 performance.disable()
 performance.toggle()
 performance.is_active()
 
 -- Manual motion execution (for custom keymaps)
-local orchestrator = require("luxmotion.engine.orchestrator")
+local orchestrator = require("whisk.engine.orchestrator")
 orchestrator.execute("basic_j", { count = 5, direction = "j" })
 orchestrator.execute("word_w", { count = 3, direction = "w" })
 orchestrator.execute("find_f", { char = "x", count = 2, direction = "f" })
@@ -217,7 +217,7 @@ orchestrator.execute("text_object_}", { count = 1, direction = "}" })
 
 ### **Disable Default Keymaps**
 ```lua
-require("luxmotion").setup({
+require("whisk").setup({
   keymaps = {
     cursor = false,
     scroll = false,
@@ -225,7 +225,7 @@ require("luxmotion").setup({
 })
 
 -- Define your own
-local orchestrator = require("luxmotion.engine.orchestrator")
+local orchestrator = require("whisk.engine.orchestrator")
 vim.keymap.set("n", "j", function()
   orchestrator.execute("basic_j", { count = vim.v.count1, direction = "j" })
 end)
@@ -233,7 +233,7 @@ end)
 
 ### **Different Speeds for Cursor vs Scroll**
 ```lua
-require("luxmotion").setup({
+require("whisk").setup({
   cursor = {
     duration = 100,
     easing = "linear",
@@ -247,7 +247,7 @@ require("luxmotion").setup({
 
 ### **Performance-Oriented Setup**
 ```lua
-require("luxmotion").setup({
+require("whisk").setup({
   cursor = {
     duration = 150,
     easing = "linear",
@@ -260,7 +260,7 @@ require("luxmotion").setup({
 
 ## 📈 Comparison
 
-| Feature                  | luxmotion | neoscroll.nvim | vim-smoothie |
+| Feature                  | whisk | neoscroll.nvim | vim-smoothie |
 |--------------------------|----------|----------------|--------------|
 | Cursor Movement          | ✅       | ❌              | ❌           |
 | Scroll Movement          | ✅       | ✅              | ✅           |
@@ -276,7 +276,7 @@ require("luxmotion").setup({
 ## 🐛 Troubleshooting
 
 - **Performance Issues**
-  - Enable performance mode: `:LuxMotionPerformanceEnable`
+  - Enable performance mode: `:WhiskPerformanceEnable`
   - Reduce animation duration: `cursor = { duration = 100 }`
   - Use `linear` easing for fastest performance
 - **Conflicts**
