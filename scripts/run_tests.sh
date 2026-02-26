@@ -7,7 +7,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_ROOT"
 
-echo "Running nvim-luxmotion tests..."
+echo "Running whisk.nvim tests..."
 echo "================================"
 echo ""
 
