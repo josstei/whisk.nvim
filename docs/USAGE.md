@@ -147,7 +147,7 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()
+whisk.reset()              -- tear down keymaps, stop animations, clear registries
 ```
 
 ### Performance module
@@ -215,10 +215,10 @@ end, { silent = true })
 ## Behavior notes
 
 - If a motion category is disabled, whisk falls back to native `normal!` motion behavior.
-- When a new motion starts while any of its traits are already animating, all active animations complete instantly at their final positions before the new animation begins (domination).
+- When a new motion starts while any of its traits are already animating, **all** active animations (not just the conflicting ones) complete instantly at their final positions before the new animation begins (domination).
 - Word, find, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before animating.
 - Visual mode is supported for all motions except `position_zz`, `position_zt`, and `position_zb` which are Normal mode only.
-- Animations are automatically cancelled when the buffer is deleted, the window is closed, or the buffer is switched.
+- Animations are automatically cancelled when the buffer is deleted (`BufDelete`), the window is closed (`WinClosed`), or the buffer is left (`BufLeave`).
 
 ---
 

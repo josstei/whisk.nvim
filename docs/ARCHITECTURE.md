@@ -98,7 +98,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  shim[plugin/luxmotion.vim] -.->|forwards g:auto_setup| plugin[plugin/whisk.vim]
+  shim[plugin/luxmotion.vim] -.->|forwards g:auto_setup + LuxMotion* commands| plugin[plugin/whisk.vim]
   plugin --> init[whisk/init.lua]
   init --> config[config/*]
   init --> builtin[registry/builtin.lua]
@@ -107,25 +107,27 @@ flowchart LR
   init --> motions[registry/motions.lua]
   init --> loop[engine/loop.lua]
   init --> lifecycle[engine/lifecycle.lua]
-  init -.->|lazy require| perf[performance.lua]
 
   builtin --> motions
   builtin --> traits_reg
   builtin --> calcs[calculators/*]
 
+  keymaps_reg --> motions
+  keymaps_reg --> config
   keymaps_reg --> orch[engine/orchestrator.lua]
   orch --> motions
   orch --> traits_reg
+  orch --> config
   orch --> builder[context/builder.lua]
   orch --> loop
 
   builder --> ctx[context/Context.lua]
   loop --> pool[engine/pool.lua]
-  loop --> perf
-  lifecycle --> loop
+  loop --> perf[performance.lua]
+  lifecycle -.->|lazy require| loop
 ```
 
-Dashed lines indicate lazy `require()` calls (deferred to function call time rather than module load time).
+Dashed lines indicate lazy `require()` calls (deferred to function call time rather than module load time). Note that `init.lua` lazily requires `performance.lua` inside `setup()`, but since `loop.lua` eagerly requires `performance.lua` at module load time, performance is always loaded transitively when `init.lua` loads `loop`.
 
 ---
 
@@ -183,7 +185,7 @@ Each frame:
 
 1. Records frame time via `performance.record_frame_time()`.
 2. Iterates the frame queue in reverse for safe removal.
-3. Validates context via `context:is_valid()`. If invalid, fires `on_cancel` with a reason string, removes the animation, and skips to the next entry.
+3. If the context has an `is_valid` method, validates via `context:is_valid()`. If invalid, fires `on_cancel` with a reason string, removes the animation, and skips to the next entry.
 4. Computes `progress = elapsed / duration`, clamped to `[0, 1]`.
 5. Applies the easing function to get `eased` progress.
 6. Calls `interpolate_result()` to lerp cursor line/col and viewport topline between start and target.
@@ -248,7 +250,7 @@ Two calculation strategies:
 
 When enabled, performance mode:
 
-- Disables syntax highlighting (`vim.bo.syntax = "off"`, restored on disable).
+- Conditionally disables syntax highlighting (`vim.bo.syntax = "off"`, restored on disable) when `disable_syntax_during_scroll` is set.
 - Reduces frame rate from 60fps to 30fps when both performance mode is active **and** `reduce_frame_rate` is set.
 - Populates a passive lookup table of ignored events (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`). Callers check `should_ignore_event(event)` to decide whether to skip logic — no autocmds are registered to intercept events.
 - Auto-enables on `BufEnter`/`BufWinEnter` for files exceeding `large_file_threshold` lines.

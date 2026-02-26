@@ -128,7 +128,7 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()
+whisk.reset()              -- tear down keymaps, stop animations, clear registries
 ```
 
 ### Manual motion execution
@@ -198,7 +198,7 @@ require("whisk").setup({
 
 When enabled, performance mode:
 
-- Disables syntax highlighting during scroll animations
+- Disables syntax highlighting when `disable_syntax_during_scroll` is set (default: on)
 - Optionally reduces frame rate from 60fps to 30fps (`reduce_frame_rate = true`)
 - Auto-enables on files larger than `large_file_threshold` lines (default: 5000)
 - Exposes a configurable `ignore_events` list (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`) for callers to check via `should_ignore_event()`
