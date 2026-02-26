@@ -23,7 +23,7 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 - Separate duration and easing for cursor vs scroll animations
 - Performance mode with automatic large file detection
 - Object pooling to minimize garbage collection
-- Extensible — register custom motions or define your own keymaps
+- Extensible — define your own keymaps via the orchestrator API, or register custom motions and traits through the registry
 
 ---
 
@@ -34,6 +34,8 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 ---
 
 ## Installation
+
+The plugin auto-calls `require("whisk").setup()` on load. To disable this and call setup manually, set `g:whisk_auto_setup = 0` before the plugin loads.
 
 ### lazy.nvim
 
@@ -80,7 +82,9 @@ require("whisk").setup({
   performance = {
     enabled = false,
     disable_syntax_during_scroll = true,
+    ignore_events = { "WinScrolled", "CursorMoved", "CursorMovedI" },
     reduce_frame_rate = false,
+    frame_rate_threshold = 60,
     auto_enable_on_large_files = true,
     large_file_threshold = 5000,
   },
@@ -123,6 +127,8 @@ whisk.enable_scroll()
 whisk.disable_scroll()
 
 whisk.toggle_performance()
+
+whisk.reset()
 ```
 
 ### Manual motion execution
@@ -195,7 +201,7 @@ When enabled, performance mode:
 - Disables syntax highlighting during scroll animations
 - Optionally reduces frame rate from 60fps to 30fps (`reduce_frame_rate = true`)
 - Auto-enables on files larger than `large_file_threshold` lines (default: 5000)
-- Ignores `WinScrolled`, `CursorMoved`, and `CursorMovedI` events during animations
+- Exposes a configurable `ignore_events` list (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`) for callers to check via `should_ignore_event()`
 
 Toggle at runtime with `:WhiskPerformanceToggle` or `require("whisk").toggle_performance()`.
 
@@ -213,6 +219,18 @@ Toggle at runtime with `:WhiskPerformanceToggle` or `require("whisk").toggle_per
 | Search navigation | Yes | No | No |
 | Visual mode | Yes | Scroll only | Scroll only |
 | Count prefixes | Yes | Scroll only | Scroll only |
+
+---
+
+## Migrating from nvim-luxmotion
+
+whisk.nvim was previously published as nvim-luxmotion. A deprecation shim is included:
+
+- `require("luxmotion")` forwards to `require("whisk")` with a warning.
+- All `:LuxMotion*` commands forward to their `:Whisk*` equivalents.
+- `g:luxmotion_auto_setup` forwards to `g:whisk_auto_setup`.
+
+Update your config to use `whisk` directly — the shim will be removed in a future release.
 
 ---
 

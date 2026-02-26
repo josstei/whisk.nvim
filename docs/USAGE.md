@@ -63,7 +63,9 @@ require("whisk").setup({
   performance = {
     enabled = false,
     disable_syntax_during_scroll = true,
+    ignore_events = { "WinScrolled", "CursorMoved", "CursorMovedI" },
     reduce_frame_rate = false,
+    frame_rate_threshold = 60,
     auto_enable_on_large_files = true,
     large_file_threshold = 5000,
   },
@@ -98,8 +100,10 @@ require("whisk").setup({
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enabled` | boolean | `false` | Start in performance mode |
-| `disable_syntax_during_scroll` | boolean | `true` | Disable syntax highlighting while active |
-| `reduce_frame_rate` | boolean | `false` | Switch from 60fps to 30fps while active |
+| `disable_syntax_during_scroll` | boolean | `true` | Disable syntax highlighting while performance mode is active |
+| `ignore_events` | table | `{"WinScrolled", "CursorMoved", "CursorMovedI"}` | Events to flag as ignorable via `should_ignore_event()` while performance mode is active |
+| `reduce_frame_rate` | boolean | `false` | Switch from 60fps to 30fps during animations when performance mode is active |
+| `frame_rate_threshold` | number | `60` | FPS threshold for reduced frame rate decisions |
 | `auto_enable_on_large_files` | boolean | `true` | Auto-enable for large buffers |
 | `large_file_threshold` | number | `5000` | Line count threshold for auto-enable |
 
@@ -142,6 +146,8 @@ whisk.enable_scroll()
 whisk.disable_scroll()
 
 whisk.toggle_performance()
+
+whisk.reset()
 ```
 
 ### Performance module
@@ -182,7 +188,9 @@ orchestrator.execute("scroll_ctrl_d", { count = 1, direction = "<C-d>" })
 | Line | `line_gg`, `line_G`, `line_\|` |
 | Search | `search_n`, `search_N` |
 | Screen | `screen_gj`, `screen_gk` |
-| Scroll | `scroll_ctrl_d`, `scroll_ctrl_u`, `scroll_ctrl_f`, `scroll_ctrl_b`, `position_zz`, `position_zt`, `position_zb` |
+| Scroll | `scroll_ctrl_d`, `scroll_ctrl_u`, `scroll_ctrl_f`, `scroll_ctrl_b`, `position_zz`\*, `position_zt`\*, `position_zb`\* |
+
+\* Normal mode only.
 
 ---
 
@@ -207,9 +215,9 @@ end, { silent = true })
 ## Behavior notes
 
 - If a motion category is disabled, whisk falls back to native `normal!` motion behavior.
-- When a new motion starts while the same trait is already animating, the active animation completes instantly at its final position before the new animation begins (domination).
+- When a new motion starts while any of its traits are already animating, all active animations complete instantly at their final positions before the new animation begins (domination).
 - Word, find, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before animating.
-- Visual mode is supported for motions registered with `modes = { "n", "v" }`.
+- Visual mode is supported for all motions except `position_zz`, `position_zt`, and `position_zb` which are Normal mode only.
 - Animations are automatically cancelled when the buffer is deleted, the window is closed, or the buffer is switched.
 
 ---
