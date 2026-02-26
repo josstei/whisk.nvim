@@ -1,4 +1,4 @@
-local Context = require('luxmotion.context.Context')
+local Context = require('whisk.context.Context')
 
 local M = {}
 

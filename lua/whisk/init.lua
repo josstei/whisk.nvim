@@ -1,10 +1,10 @@
-local config = require("luxmotion.config")
-local builtin = require("luxmotion.registry.builtin")
-local keymaps = require("luxmotion.registry.keymaps")
-local traits = require("luxmotion.registry.traits")
-local motions = require("luxmotion.registry.motions")
-local loop = require("luxmotion.engine.loop")
-local lifecycle = require("luxmotion.engine.lifecycle")
+local config = require("whisk.config")
+local builtin = require("whisk.registry.builtin")
+local keymaps = require("whisk.registry.keymaps")
+local traits = require("whisk.registry.traits")
+local motions = require("whisk.registry.motions")
+local loop = require("whisk.engine.loop")
+local lifecycle = require("whisk.engine.lifecycle")
 
 local M = {}
 
@@ -18,7 +18,7 @@ function M.setup(user_config)
   config.validate(user_config)
   config.update(user_config)
 
-  local performance = require("luxmotion.performance")
+  local performance = require("whisk.performance")
   performance.setup()
 
   builtin.register_all()
@@ -75,7 +75,7 @@ function M.disable_scroll()
 end
 
 function M.toggle_performance()
-  local performance = require("luxmotion.performance")
+  local performance = require("whisk.performance")
   if performance.is_active() then
     performance.disable()
   else

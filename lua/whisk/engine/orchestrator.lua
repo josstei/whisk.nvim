@@ -1,8 +1,8 @@
-local traits = require("luxmotion.registry.traits")
-local motions = require("luxmotion.registry.motions")
-local context_builder = require("luxmotion.context.builder")
-local loop = require("luxmotion.engine.loop")
-local config = require("luxmotion.config")
+local traits = require("whisk.registry.traits")
+local motions = require("whisk.registry.motions")
+local context_builder = require("whisk.context.builder")
+local loop = require("whisk.engine.loop")
+local config = require("whisk.config")
 
 local M = {}
 

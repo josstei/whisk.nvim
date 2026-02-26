@@ -3,9 +3,9 @@ local M = {}
 local autocmd_group = nil
 
 function M.setup()
-  local loop = require('luxmotion.engine.loop')
+  local loop = require('whisk.engine.loop')
 
-  autocmd_group = vim.api.nvim_create_augroup('LuxmotionLifecycle', { clear = true })
+  autocmd_group = vim.api.nvim_create_augroup('WhiskLifecycle', { clear = true })
 
   vim.api.nvim_create_autocmd('BufDelete', {
     group = autocmd_group,

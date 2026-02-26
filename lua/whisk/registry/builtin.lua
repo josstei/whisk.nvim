@@ -1,6 +1,6 @@
-local traits = require("luxmotion.registry.traits")
-local motions = require("luxmotion.registry.motions")
-local calculators = require("luxmotion.calculators")
+local traits = require("whisk.registry.traits")
+local motions = require("whisk.registry.motions")
+local calculators = require("whisk.calculators")
 
 local M = {}
 
