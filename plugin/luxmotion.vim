@@ -1,0 +1,10 @@
+command! LuxMotionEnable WhiskEnable
+command! LuxMotionDisable WhiskDisable
+command! LuxMotionToggle WhiskToggle
+command! LuxMotionEnableCursor WhiskEnableCursor
+command! LuxMotionDisableCursor WhiskDisableCursor
+command! LuxMotionEnableScroll WhiskEnableScroll
+command! LuxMotionDisableScroll WhiskDisableScroll
+command! LuxMotionPerformanceEnable WhiskPerformanceEnable
+command! LuxMotionPerformanceDisable WhiskPerformanceDisable
+command! LuxMotionPerformanceToggle WhiskPerformanceToggle
