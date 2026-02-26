@@ -1,208 +1,146 @@
-<h1 align="left">
-  <img src="https://github.com/user-attachments/assets/546ee0e5-30fd-4e37-b219-e390be8b1c6e"
-       alt="LuxVim Logo"
-       style="width: 40px; height: 40px; position: relative; top: 6px; margin-right: 10px;" />
-  whisk.nvim
-</h1>
+# whisk.nvim
 
-A comprehensive **Neovim smooth motion plugin**, providing **fluid animations for all motion commands**.
-Combines smooth **cursor movement**, **word navigation**, **text objects**, and **viewport scrolling** into one seamless experience.
+Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor movement, word navigation, text objects, and viewport scrolling — all in one plugin.
 
 ---
 
-## ✨ Features
+## Features
 
-- **Smooth Animations**
-  - 60fps fluid animations for **all Vim motion commands**
-  - Unified smooth **cursor movement** and **viewport scrolling**
-  - Works in **Normal** and **Visual** modes with **count prefixes**
+**Motion coverage** — animates every standard Vim motion:
 
-- **Extensive Movement Coverage**
-  - **Basic**: `h`, `j`, `k`, `l`, `0`, `$`
-  - **Word Navigation**: `w`, `b`, `e`, `W`, `B`, `E`
-  - **Find/Till**: `f`, `F`, `t`, `T` (supports counts)
-  - **Text Objects**: `{`, `}`, `(`, `)`, `%`
-  - **Line Jumps**: `gg`, `G`, `|`
-  - **Search Navigation**: `n`, `N`
-  - **Screen Lines**: `gj`, `gk`
-  - **Viewport Scrolling**: `<C-d>`, `<C-u>`, `<C-f>`, `<C-b>`, `zz`, `zt`, `zb`
+| Category | Motions |
+|----------|---------|
+| Basic | `h`, `j`, `k`, `l`, `0`, `$` |
+| Word | `w`, `b`, `e`, `W`, `B`, `E` |
+| Find/Till | `f`, `F`, `t`, `T` |
+| Text Objects | `{`, `}`, `(`, `)`, `%` |
+| Line Jumps | `gg`, `G`, `\|` |
+| Search | `n`, `N` |
+| Screen Lines | `gj`, `gk` |
+| Viewport | `<C-d>`, `<C-u>`, `<C-f>`, `<C-b>`, `zz`, `zt`, `zb` |
 
-- **Performance & Optimization**
-  - Object pooling and **frame reuse** to reduce garbage collection
-  - **API call caching** (50ms window) for efficient redraws
-  - Optimized for **smooth 60fps animations**
-  - **Performance Mode** for faster but less smooth rendering:
-    - Reduces animation duration and easing complexity
-    - Optional syntax highlighting toggle for large files
-
-- **Flexible Configuration**
-  - Separate settings for **cursor** and **scroll** animations:
-    - Duration (ms)
-    - Easing function (`linear`, `ease-in`, `ease-out`, `ease-in-out`)
-    - Enable/disable individually
-  - **Keymap control**:
-    - Enable/disable default mappings
-    - Define **custom mappings** for any motion
-  - Easily toggle **performance mode** at runtime
-
-- **Comprehensive Command & API Support**
-  - Commands:
-    - `:WhiskEnable` / `:WhiskDisable` / `:WhiskToggle`
-    - `:WhiskPerformanceEnable` / `Disable` / `Toggle`
-  - Lua API:
-    - Enable/disable cursor and scroll animations
-    - Toggle performance mode
-    - Trigger **manual smooth motions** for custom keymaps
-
-- **Customization & Extensibility**
-  - Different speeds and easing curves for cursor vs scrolling
-  - Integrate with **custom motions** or other keymaps
-  - Visual mode motions supported **out-of-the-box**
-
-- **Compatibility**
-  - Neovim **≥ 0.7**
-  - Designed to **coexist with other scroll/motion plugins** (disable keymaps if needed)
+- Works in Normal and Visual modes with count prefixes
+- Separate duration and easing for cursor vs scroll animations
+- Performance mode with automatic large file detection
+- Object pooling to minimize garbage collection
+- Extensible — register custom motions or define your own keymaps
 
 ---
 
-## Documentation
+## Requirements
 
-- [Usage](docs/USAGE.md)
-- [Architecture](docs/ARCHITECTURE.md)
+- Neovim >= 0.7
 
 ---
 
-## 📦 Installation
+## Installation
 
-### **Using lazy.nvim**
+### lazy.nvim
+
 ```lua
 {
   "josstei/whisk.nvim",
-  config = function()
-    require("whisk").setup({
-      cursor = {
-        duration = 150,
-        easing = "ease-out",
-        enabled = true,
-      },
-      scroll = {
-        duration = 240,
-        easing = "ease-in-out",
-        enabled = true,
-      },
-      performance = { enabled = false },
-      keymaps = {
-        cursor = true,
-        scroll = true,
-      },
-    })
-  end,
+  event = "VeryLazy",
+  opts = {},
 }
 ```
 
-### **Using packer.nvim**
-```lua
-use {
-  "josstei/whisk.nvim",
-  config = function()
-    require("whisk").setup()
-  end
-}
-```
+### vim-plug
 
-### **Using vim-plug**
 ```vim
 Plug 'josstei/whisk.nvim'
 ```
 
-Then in your `init.lua` or `init.vim`:
 ```lua
-lua << EOF
 require("whisk").setup()
-EOF
 ```
 
 ---
 
-## 🛠️ Configuration
+## Configuration
+
+All options with their defaults:
 
 ```lua
 require("whisk").setup({
   cursor = {
-    duration = 150,       -- Cursor animation duration (ms)
-    easing = "ease-out",  -- Cursor easing function
+    duration = 150,
+    easing = "ease-out",
     enabled = true,
   },
   scroll = {
-    duration = 240,       -- Scroll animation duration (ms)
-    easing = "ease-in-out",  -- Scroll easing function
+    duration = 200,
+    easing = "ease-in-out",
     enabled = true,
   },
-  performance = {
-    enabled = false,      -- Enable performance mode
-  },
   keymaps = {
-    cursor = true,        -- Enable cursor motion keymaps
-    scroll = true,        -- Enable scroll motion keymaps
+    cursor = true,
+    scroll = true,
+  },
+  performance = {
+    enabled = false,
+    disable_syntax_during_scroll = true,
+    reduce_frame_rate = false,
+    auto_enable_on_large_files = true,
+    large_file_threshold = 5000,
   },
 })
 ```
 
----
-
-## 🎮 Commands
-
-### **Global Controls**
-- `:WhiskEnable` – Enable all animations
-- `:WhiskDisable` – Disable all animations
-- `:WhiskToggle` – Toggle all animations
-
-### **Individual Controls**
-- `:WhiskEnableCursor` / `:WhiskDisableCursor`
-- `:WhiskEnableScroll` / `:WhiskDisableScroll`
-
-### **Performance Mode**
-- `:WhiskPerformanceEnable`
-- `:WhiskPerformanceDisable`
-- `:WhiskPerformanceToggle`
+**Easing options:** `linear`, `ease-in`, `ease-out`, `ease-in-out`
 
 ---
 
-## 🔧 Lua API
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `:WhiskEnable` | Enable all animations |
+| `:WhiskDisable` | Disable all animations |
+| `:WhiskToggle` | Toggle all animations |
+| `:WhiskEnableCursor` | Enable cursor animations |
+| `:WhiskDisableCursor` | Disable cursor animations |
+| `:WhiskEnableScroll` | Enable scroll animations |
+| `:WhiskDisableScroll` | Disable scroll animations |
+| `:WhiskPerformanceEnable` | Enable performance mode |
+| `:WhiskPerformanceDisable` | Disable performance mode |
+| `:WhiskPerformanceToggle` | Toggle performance mode |
+
+---
+
+## Lua API
 
 ```lua
 local whisk = require("whisk")
 
--- Global control
 whisk.enable()
 whisk.disable()
 whisk.toggle()
 
--- Individual controls
 whisk.enable_cursor()
 whisk.disable_cursor()
 whisk.enable_scroll()
 whisk.disable_scroll()
 
--- Performance mode
-local performance = require("whisk.performance")
-performance.enable()
-performance.disable()
-performance.toggle()
-performance.is_active()
-
--- Manual motion execution (for custom keymaps)
-local orchestrator = require("whisk.engine.orchestrator")
-orchestrator.execute("basic_j", { count = 5, direction = "j" })
-orchestrator.execute("word_w", { count = 3, direction = "w" })
-orchestrator.execute("find_f", { char = "x", count = 2, direction = "f" })
-orchestrator.execute("text_object_}", { count = 1, direction = "}" })
+whisk.toggle_performance()
 ```
 
-### Available Motion IDs
+### Manual motion execution
 
-| Category | Motion IDs |
-|----------|------------|
+For custom keymaps, use the orchestrator directly:
+
+```lua
+local orchestrator = require("whisk.engine.orchestrator")
+
+orchestrator.execute("basic_j", { count = 5, direction = "j" })
+orchestrator.execute("word_w", { count = 3, direction = "w" })
+orchestrator.execute("find_f", { char = "x", count = 1, direction = "f" })
+```
+
+### Motion IDs
+
+| Category | IDs |
+|----------|-----|
 | Basic | `basic_h`, `basic_j`, `basic_k`, `basic_l`, `basic_0`, `basic_$` |
 | Word | `word_w`, `word_b`, `word_e`, `word_W`, `word_B`, `word_E` |
 | Find | `find_f`, `find_F`, `find_t`, `find_T` |
@@ -213,88 +151,77 @@ orchestrator.execute("text_object_}", { count = 1, direction = "}" })
 
 ---
 
-## 🎨 Customization Examples
+## Examples
 
-### **Disable Default Keymaps**
+### Custom keymaps
+
 ```lua
 require("whisk").setup({
-  keymaps = {
-    cursor = false,
-    scroll = false,
-  },
+  keymaps = { cursor = false, scroll = false },
 })
 
--- Define your own
 local orchestrator = require("whisk.engine.orchestrator")
 vim.keymap.set("n", "j", function()
   orchestrator.execute("basic_j", { count = vim.v.count1, direction = "j" })
 end)
 ```
 
-### **Different Speeds for Cursor vs Scroll**
+### Different speeds for cursor vs scroll
+
 ```lua
 require("whisk").setup({
-  cursor = {
-    duration = 100,
-    easing = "linear",
-  },
-  scroll = {
-    duration = 500,
-    easing = "ease-out",
-  },
+  cursor = { duration = 100, easing = "linear" },
+  scroll = { duration = 400, easing = "ease-out" },
 })
 ```
 
-### **Performance-Oriented Setup**
+### Performance-oriented
+
 ```lua
 require("whisk").setup({
-  cursor = {
-    duration = 150,
-    easing = "linear",
-  },
+  cursor = { duration = 100, easing = "linear" },
+  scroll = { duration = 150, easing = "linear" },
   performance = { enabled = true },
 })
 ```
 
 ---
 
-## 📈 Comparison
+## Performance mode
 
-| Feature                  | whisk | neoscroll.nvim | vim-smoothie |
-|--------------------------|----------|----------------|--------------|
-| Cursor Movement          | ✅       | ❌              | ❌           |
-| Scroll Movement          | ✅       | ✅              | ✅           |
-| Word Navigation          | ✅       | ❌              | ❌           |
-| Find/Till Support        | ✅       | ❌              | ❌           |
-| Text Objects             | ✅       | ❌              | ❌           |
-| Search Navigation        | ✅       | ❌              | ❌           |
-| Visual Mode              | ✅       | ✅ (scroll)     | ✅ (scroll)  |
-| Count Prefixes           | ✅       | ✅ (scroll)     | ✅ (scroll)  |
+When enabled, performance mode:
+
+- Disables syntax highlighting during scroll animations
+- Optionally reduces frame rate from 60fps to 30fps (`reduce_frame_rate = true`)
+- Auto-enables on files larger than `large_file_threshold` lines (default: 5000)
+- Ignores `WinScrolled`, `CursorMoved`, and `CursorMovedI` events during animations
+
+Toggle at runtime with `:WhiskPerformanceToggle` or `require("whisk").toggle_performance()`.
 
 ---
 
-## 🐛 Troubleshooting
+## Comparison
 
-- **Performance Issues**
-  - Enable performance mode: `:WhiskPerformanceEnable`
-  - Reduce animation duration: `cursor = { duration = 100 }`
-  - Use `linear` easing for fastest performance
-- **Conflicts**
-  - Disable default keymaps: `keymaps = { cursor = false }`
-  - Set your own mappings manually
-- **Animations Not Smooth**
-  - Ensure terminal supports **true colors**
-  - Use Neovim **≥ 0.7**
-  - Lower `scrolloff` for large jumps
-
----
-
-## 🙏 Acknowledgments
-
-Inspired by [vim-smoothie](https://github.com/psliwka/vim-smoothie) and  [neoscroll.nvim](https://github.com/karb94/neoscroll.nvim).
+| Feature | whisk.nvim | neoscroll.nvim | vim-smoothie |
+|---------|------------|----------------|--------------|
+| Cursor movement | Yes | No | No |
+| Scroll movement | Yes | Yes | Yes |
+| Word navigation | Yes | No | No |
+| Find/Till | Yes | No | No |
+| Text objects | Yes | No | No |
+| Search navigation | Yes | No | No |
+| Visual mode | Yes | Scroll only | Scroll only |
+| Count prefixes | Yes | Scroll only | Scroll only |
 
 ---
 
-## 📄 License
+## Documentation
 
-MIT License – see [LICENSE](LICENSE) for details.
+- [Usage Guide](docs/USAGE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
