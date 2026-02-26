@@ -124,6 +124,8 @@ flowchart LR
   builder --> ctx[context/Context.lua]
   loop --> pool[engine/pool.lua]
   loop --> perf[performance.lua]
+  loop --> traits_reg
+  perf --> config
   lifecycle -.->|lazy require| loop
 ```
 
@@ -193,7 +195,7 @@ Each frame:
 8. When `progress >= 1.0`: fires `on_complete`, removes from queue, releases animation object to pool.
 9. Reschedules itself if the queue is non-empty; otherwise stops.
 
-Frame interval is determined by `performance.get_frame_interval()`: 16ms (~60fps) normally, 33ms (~30fps) with `reduce_frame_rate` enabled.
+Frame interval is determined by `performance.get_frame_interval()`: 16ms (~60fps) normally, 33ms (~30fps) when both performance mode is active and `reduce_frame_rate` is enabled.
 
 **Easing functions:** `linear`, `ease-in`, `ease-out`, `ease-in-out`.
 
