@@ -103,7 +103,7 @@ require("whisk").setup({
 | `disable_syntax_during_scroll` | boolean | `true` | Disable syntax highlighting while performance mode is active |
 | `ignore_events` | table | `{"WinScrolled", "CursorMoved", "CursorMovedI"}` | Events to flag as ignorable via `should_ignore_event()` while performance mode is active |
 | `reduce_frame_rate` | boolean | `false` | Switch from 60fps to 30fps during animations when performance mode is active |
-| `frame_rate_threshold` | number | `60` | FPS threshold for reduced frame rate decisions |
+| `frame_rate_threshold` | number | `60` | Reserved for future use (not currently read by any code path) |
 | `auto_enable_on_large_files` | boolean | `true` | Auto-enable for large buffers |
 | `large_file_threshold` | number | `5000` | Line count threshold for auto-enable |
 

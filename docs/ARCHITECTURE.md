@@ -98,7 +98,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  shim[plugin/luxmotion.vim] -.->|forwards g:auto_setup + LuxMotion* commands| plugin[plugin/whisk.vim]
+  shim[plugin/luxmotion.vim] -.->|forwards g:luxmotion_auto_setup + LuxMotion* commands| plugin[plugin/whisk.vim]
   plugin --> init[whisk/init.lua]
   init --> config[config/*]
   init --> builtin[registry/builtin.lua]
@@ -138,7 +138,7 @@ Dashed lines indicate lazy `require()` calls (deferred to function call time rat
 `orchestrator.execute(motion_id, input)` performs:
 
 1. Look up the motion definition from `motions.get(motion_id)`.
-2. Check category config (`cursor` or `scroll`) is enabled. If disabled, call `fallback()` which runs `normal! <count><key>[char]`.
+2. Check category config (`cursor` or `scroll`) is enabled. If disabled, call `fallback()` which runs `normal! [count]<key>[char]` (count is only prepended when greater than 1).
 3. Check if any of the motion's traits are currently animating. If so, call `loop.complete_all()` to snap **all** active animations to their final positions (domination). The check is per-trait, but the effect is global.
 4. Build a context snapshot via `context.builder.build(input)`.
 5. Run the calculator. Exit early if no result or if the cursor hasn't moved.
@@ -244,7 +244,7 @@ Calculators receive a context and return a target:
 Two calculation strategies:
 
 - **Direct math** — basic, line, and scroll calculators compute targets arithmetically from context values.
-- **Native delegation** — word, find, screen, search, and text object calculators execute `normal!` motions to find the accurate target, then restore the cursor before returning the result.
+- **Native delegation** — word, find, search (including screen-line motions gj/gk), and text object calculators execute `normal!` motions to find the accurate target, then restore the cursor before returning the result.
 
 ---
 
