@@ -27,7 +27,7 @@ lua/whisk/
   config/
     defaults.lua              Default configuration values
     validation.lua            Config validation
-    management.lua            Runtime config get/update/reset
+    management.lua            Runtime config get/update/reset (get accepts optional category key)
 
   registry/
     builtin.lua               Registers built-in traits and motions
@@ -68,7 +68,7 @@ lua/luxmotion/
 
 plugin/
   whisk.vim                   VimScript entry point (auto-setup, Whisk* commands: Enable/Disable/Toggle, EnableCursor/DisableCursor, EnableScroll/DisableScroll, PerformanceEnable/PerformanceDisable/PerformanceToggle)
-  luxmotion.vim               Deprecation shim (coordinates via g:whisk_auto_setup variable, defines LuxMotion* command aliases)
+  luxmotion.vim               Deprecation shim (bridges g:luxmotion_auto_setup → g:whisk_auto_setup, defines LuxMotion* command aliases)
 ```
 
 ---
@@ -98,7 +98,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  shim[plugin/luxmotion.vim] -.->|coordinates via g:whisk_auto_setup + defines LuxMotion* aliases| plugin[plugin/whisk.vim]
+  shim[plugin/luxmotion.vim] -.->|bridges g:luxmotion_auto_setup → g:whisk_auto_setup + defines LuxMotion* aliases| plugin[plugin/whisk.vim]
   plugin --> init[whisk/init.lua]
   init --> config[config/*]
   init --> builtin[registry/builtin.lua]
@@ -129,7 +129,15 @@ flowchart LR
   lifecycle -.->|lazy require| loop
 ```
 
-Dashed lines indicate lazy `require()` calls (deferred to function call time rather than module load time). Note that `init.lua` lazily requires `performance.lua` inside `setup()`, but since `loop.lua` eagerly requires `performance.lua` at module load time, performance is always loaded transitively when `init.lua` loads `loop`.
+Dashed lines indicate lazy `require()` calls (deferred to function call time rather than module load time). `lifecycle.lua` defers its `require("whisk.engine.loop")` to function bodies to avoid a circular dependency at load time. Although `init.lua` uses `require("whisk.performance")` inside `setup()` and `toggle_performance()`, this is not a true lazy load — `performance.lua` is already cached because `init.lua` eagerly requires `loop.lua` at module load time, and `loop.lua` eagerly requires `performance.lua`.
+
+---
+
+## Setup and teardown
+
+`init.setup(user_config)` handles re-initialization: if already initialized, it calls `reset()` before proceeding. This allows users to call `setup()` multiple times (e.g., to change config at runtime) without leaking keymaps or autocmds.
+
+`init.reset()` tears down in this order: `keymaps.clear()`, `loop.stop_all()`, `traits.clear()`, `motions.clear()`, `lifecycle.teardown()`. Note that `performance.setup()` installs `BufEnter`/`BufWinEnter` autocmds without a named augroup, so these are **not** torn down by `reset()`. Performance autocmds persist across re-initialization.
 
 ---
 
@@ -231,6 +239,13 @@ Creates a `WhiskLifecycle` augroup with three autocmds:
 | `WinClosed` | Cancel animations for the closed window |
 | `BufLeave` | Cancel animations for the left buffer |
 
+**Additional lifecycle exports:**
+
+| Function | Description |
+|----------|-------------|
+| `teardown()` | Deletes the `WhiskLifecycle` augroup and all its autocmds (called by `init.reset()`) |
+| `is_active()` | Returns whether the lifecycle augroup is currently registered |
+
 ---
 
 ## Traits
@@ -241,6 +256,8 @@ Traits are small apply functions that know how to write an interpolated frame to
 - **scroll** trait calls `context:restore_view(topline, line, col)`.
 
 Traits also track per-trait animation state to enable domination (preventing overlapping animations of the same type).
+
+Trait definitions (stored in the traits registry) accept `on_start` and `on_complete` hooks alongside the `apply` function. These hooks live on the trait definition, not on animation objects. Animation objects in the pool carry `on_complete` and `on_cancel` callbacks that are set per-animation by the orchestrator — these are distinct from the trait-level hooks.
 
 The traits module exposes two reset mechanisms:
 
@@ -284,7 +301,8 @@ Note: `frame_rate_threshold` is defined in defaults (`60`) but is not currently 
 
 ## Extension points
 
-- **Custom keymaps** — call `orchestrator.execute()` directly with any registered motion ID.
+- **Custom keymaps** — call `orchestrator.execute()` directly with any registered motion ID, or use `require("whisk.registry.keymaps").create_handler(motion)` to generate a keymap handler function that reads `vim.v.count1` and collects char input automatically.
 - **Custom motions** — register via `require("whisk.registry.motions").register()`.
 - **Custom traits** — register via `require("whisk.registry.traits").register()`.
+- **Selective built-in registration** — `require("whisk.registry.builtin")` exposes `register_all()`, `register_traits()`, and `register_motions()` separately.
 - Built-in motions and traits are registered through `registry/builtin.lua` during setup.

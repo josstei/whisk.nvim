@@ -100,10 +100,10 @@ require("whisk").setup({
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enabled` | boolean | `false` | Start in performance mode |
-| `disable_syntax_during_scroll` | boolean | `true` | Disable syntax highlighting while performance mode is active |
+| `disable_syntax_during_scroll` | boolean | `true` | Disable syntax highlighting when performance mode is enabled (restored on disable) |
 | `ignore_events` | table | `{"WinScrolled", "CursorMoved", "CursorMovedI"}` | Events to flag as ignorable via `should_ignore_event()` while performance mode is active |
 | `reduce_frame_rate` | boolean | `false` | Switch from 60fps to 30fps during animations when performance mode is active |
-| `frame_rate_threshold` | number | `60` | Reserved for future use (not currently read by any code path) |
+| `frame_rate_threshold` | number | `60` | Target FPS threshold for auto-switching to reduced frame rate (not currently read by any code path) |
 | `auto_enable_on_large_files` | boolean | `true` | Auto-enable for large buffers |
 | `large_file_threshold` | number | `5000` | Line count threshold for auto-enable |
 
@@ -147,7 +147,7 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()              -- tear down keymaps, stop animations, clear registries, remove lifecycle autocmds
+whisk.reset()              -- tear down keymaps, stop animations, clear all registries (including custom), remove lifecycle autocmds
 ```
 
 ### Performance module
@@ -161,6 +161,9 @@ performance.is_active()
 performance.get_current_fps()
 performance.get_frame_interval()
 performance.should_ignore_event(event)
+performance.should_auto_enable()     -- check if current buffer exceeds large_file_threshold
+performance.auto_toggle()            -- enable/disable based on config and buffer size
+performance.record_frame_time()      -- record a frame timestamp for FPS calculation
 ```
 
 ---
@@ -213,11 +216,35 @@ end, { silent = true })
 
 ---
 
+## Registry API
+
+Register custom motions and traits, or selectively load built-ins:
+
+```lua
+local motions = require("whisk.registry.motions")
+local traits = require("whisk.registry.traits")
+local builtin = require("whisk.registry.builtin")
+local keymaps = require("whisk.registry.keymaps")
+
+motions.register({ id = "...", keys = {...}, modes = {...}, traits = {...}, category = "...", calculator = fn })
+traits.register({ id = "...", apply = fn, on_start = fn, on_complete = fn })
+
+builtin.register_all()       -- register all built-in traits and motions
+builtin.register_traits()    -- register only built-in traits
+builtin.register_motions()   -- register only built-in motions
+
+keymaps.create_handler(motion)  -- generate a keymap handler for a registered motion
+```
+
+Note: `whisk.reset()` clears all registered motions and traits, including custom ones. Re-register after calling `reset()` or `setup()`.
+
+---
+
 ## Behavior notes
 
 - If a motion category is disabled, whisk falls back to native `normal!` motion behavior.
 - When a new motion starts while any of its traits are already animating, **all** active animations (not just the conflicting ones) complete instantly at their final positions before the new animation begins (domination).
-- Word, find, screen, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before animating.
+- Word, find, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before animating. Screen-line motions (`gj`/`gk`) also use native delegation and are colocated in the search calculator module.
 - Visual mode is supported for all motions except `position_zz`, `position_zt`, and `position_zb` which are Normal mode only.
 - Animations are automatically cancelled when the buffer is deleted (`BufDelete`), the window is closed (`WinClosed`), or the buffer is left (`BufLeave`).
 - The animation engine uses an object pool (up to 10 reusable animation objects) to reduce garbage collection pressure during rapid motion sequences.
@@ -233,6 +260,10 @@ whisk.nvim was previously published as nvim-luxmotion. A deprecation shim is inc
 - `g:luxmotion_auto_setup` forwards to `g:whisk_auto_setup`.
 
 The deprecated `whisk.cursor.keymaps` and `whisk.scroll.keymaps` modules also forward to the orchestrator with a deprecation warning. If your config references these modules, switch to `require("whisk.engine.orchestrator")` directly.
+
+Deprecated cursor functions: `smooth_move`, `smooth_word_move`, `smooth_find_move`, `smooth_text_object_move`, `smooth_line_move`, `smooth_search_move`, `smooth_screen_line_move`, `setup_keymaps`.
+
+Deprecated scroll functions: `smooth_scroll`, `visual_smooth_scroll`, `smooth_position`, `setup_keymaps`.
 
 The shim will be removed in a future release. Update your config to use `whisk` directly.
 

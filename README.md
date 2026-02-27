@@ -84,7 +84,7 @@ require("whisk").setup({
     disable_syntax_during_scroll = true,
     ignore_events = { "WinScrolled", "CursorMoved", "CursorMovedI" },
     reduce_frame_rate = false,
-    frame_rate_threshold = 60,    -- reserved for future use
+    frame_rate_threshold = 60,    -- not currently read by any code path
     auto_enable_on_large_files = true,
     large_file_threshold = 5000,
   },
@@ -213,7 +213,7 @@ When enabled, performance mode:
 
 - Disables syntax highlighting when `disable_syntax_during_scroll` is set (default: on)
 - Optionally reduces frame rate from 60fps to 30fps (`reduce_frame_rate = true`)
-- Auto-enables on files larger than `large_file_threshold` lines (default: 5000)
+- Auto-enables on `BufEnter`/`BufWinEnter` for files larger than `large_file_threshold` lines (default: 5000)
 - Exposes a configurable `ignore_events` list (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`) for callers to check via `should_ignore_event()`
 
 Toggle at runtime with `:WhiskPerformanceToggle` or `require("whisk").toggle_performance()`.

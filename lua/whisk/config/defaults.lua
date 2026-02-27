@@ -20,7 +20,7 @@ M.config = {
     disable_syntax_during_scroll = true,
     ignore_events = {'WinScrolled', 'CursorMoved', 'CursorMovedI'},
     reduce_frame_rate = false,
-    frame_rate_threshold = 60, -- Switch to reduced frame rate under this FPS
+    frame_rate_threshold = 60, -- Target FPS threshold for auto-switching to reduced frame rate (not currently read)
     auto_enable_on_large_files = true,
     large_file_threshold = 5000, -- Lines
   },
