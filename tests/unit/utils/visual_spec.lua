@@ -10,7 +10,7 @@ describe('utils/visual', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    visual = require('luxmotion.utils.visual')
+    visual = require('whisk.utils.visual')
   end)
 
   it('exports all required functions', function()

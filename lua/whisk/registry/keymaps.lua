@@ -1,6 +1,6 @@
-local motions = require("luxmotion.registry.motions")
-local orchestrator = require("luxmotion.engine.orchestrator")
-local config = require("luxmotion.config")
+local motions = require("whisk.registry.motions")
+local orchestrator = require("whisk.engine.orchestrator")
+local config = require("whisk.config")
 
 local M = {}
 

@@ -1,4 +1,4 @@
-local defaults = require("luxmotion.config.defaults")
+local defaults = require("whisk.config.defaults")
 
 local M = {}
 

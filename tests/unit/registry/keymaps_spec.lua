@@ -13,9 +13,9 @@ describe('registry/keymaps', function()
     mocks.setup()
     mocks.clear_package_cache()
 
-    motions = require('luxmotion.registry.motions')
-    config = require('luxmotion.config')
-    keymaps = require('luxmotion.registry.keymaps')
+    motions = require('whisk.registry.motions')
+    config = require('whisk.config')
+    keymaps = require('whisk.registry.keymaps')
 
     motions.clear()
     config.reset()
@@ -173,7 +173,7 @@ describe('registry/keymaps', function()
   it('created handler is callable', function()
     config.update({ cursor = { enabled = true } })
 
-    local traits = require('luxmotion.registry.traits')
+    local traits = require('whisk.registry.traits')
     traits.register({
       id = 'cursor',
       apply = function() end,

@@ -10,7 +10,7 @@ describe('registry/traits', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    traits = require('luxmotion.registry.traits')
+    traits = require('whisk.registry.traits')
     traits.clear()
   end)
 

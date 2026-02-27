@@ -1,4 +1,4 @@
-local config = require("luxmotion.config")
+local config = require("whisk.config")
 
 local M = {}
 

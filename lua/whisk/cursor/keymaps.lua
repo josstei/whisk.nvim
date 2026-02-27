@@ -1,4 +1,4 @@
-local orchestrator = require("luxmotion.engine.orchestrator")
+local orchestrator = require("whisk.engine.orchestrator")
 
 local M = {}
 
@@ -6,7 +6,7 @@ local deprecated_warned = false
 local function warn_deprecated()
   if not deprecated_warned then
     vim.notify(
-      "[luxmotion] cursor.keymaps is deprecated. Use luxmotion.engine.orchestrator instead. See :help luxmotion-migration",
+      "[whisk] cursor.keymaps is deprecated. Use whisk.engine.orchestrator instead. See :help whisk-migration",
       vim.log.levels.WARN
     )
     deprecated_warned = true

@@ -18,7 +18,7 @@ describe('calculators/basic', function()
       "fifth line",
     })
     mocks.set_cursor(3, 5)
-    basic = require('luxmotion.calculators.basic')
+    basic = require('whisk.calculators.basic')
   end)
 
   it('exports h, j, k, l, 0, $ functions', function()

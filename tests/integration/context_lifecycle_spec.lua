@@ -5,7 +5,7 @@ local mocks = require('tests.mocks')
 local describe, it, before_each = runner.describe, runner.it, runner.before_each
 
 describe('Integration: Context + Lifecycle', function()
-  local luxmotion
+  local whisk
   local loop
   local builder
 
@@ -20,11 +20,11 @@ describe('Integration: Context + Lifecycle', function()
     mocks.set_window_size(40, 120)
     mocks.set_topline(1)
 
-    luxmotion = require('luxmotion')
-    loop = require('luxmotion.engine.loop')
-    builder = require('luxmotion.context.builder')
+    whisk = require('whisk')
+    loop = require('whisk.engine.loop')
+    builder = require('whisk.context.builder')
 
-    luxmotion.setup({})
+    whisk.setup({})
   end)
 
   it('animation completes successfully with valid context', function()

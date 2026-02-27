@@ -18,7 +18,7 @@ describe('calculators/search', function()
       "fifth line with long wrapped content that continues",
     })
     mocks.set_cursor(1, 0)
-    search = require('luxmotion.calculators.search')
+    search = require('whisk.calculators.search')
   end)
 
   it('exports n, N, gj, gk functions', function()

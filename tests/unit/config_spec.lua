@@ -10,7 +10,7 @@ describe('config (router)', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    config = require('luxmotion.config')
+    config = require('whisk.config')
     config.reset()
   end)
 

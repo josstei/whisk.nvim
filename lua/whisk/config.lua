@@ -1,5 +1,5 @@
-local management = require("luxmotion.config.management")
-local validation = require("luxmotion.config.validation")
+local management = require("whisk.config.management")
+local validation = require("whisk.config.validation")
 
 local M = {}
 

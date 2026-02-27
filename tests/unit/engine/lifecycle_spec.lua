@@ -10,7 +10,7 @@ describe('engine/lifecycle', function()
   before_each(function()
     mocks.setup()
     mocks.clear_package_cache()
-    lifecycle = require('luxmotion.engine.lifecycle')
+    lifecycle = require('whisk.engine.lifecycle')
   end)
 
   after_each(function()

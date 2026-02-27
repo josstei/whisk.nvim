@@ -24,10 +24,10 @@ describe('engine/orchestrator', function()
     mocks.set_window_size(40, 120)
     mocks.set_topline(1)
 
-    motions = require('luxmotion.registry.motions')
-    traits = require('luxmotion.registry.traits')
-    loop = require('luxmotion.engine.loop')
-    orchestrator = require('luxmotion.engine.orchestrator')
+    motions = require('whisk.registry.motions')
+    traits = require('whisk.registry.traits')
+    loop = require('whisk.engine.loop')
+    orchestrator = require('whisk.engine.orchestrator')
 
     motions.clear()
     traits.clear()
@@ -65,7 +65,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute starts animation for registered motion', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     orchestrator.execute('test_j', { count = 2 })
@@ -74,7 +74,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute calls calculator with context', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     local calculator_called = false
@@ -97,7 +97,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute uses fallback when category disabled', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = false } })
 
     orchestrator.execute('test_j', { count = 1 })
@@ -121,7 +121,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute passes count to calculator', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     local received_count = nil
@@ -142,7 +142,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute passes direction to calculator', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     local received_direction = nil
@@ -163,7 +163,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute does nothing when target equals current', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     motions.register({
@@ -182,7 +182,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute marks traits as animating', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     orchestrator.execute('test_j', { count = 1 })
@@ -190,7 +190,7 @@ describe('engine/orchestrator', function()
   end)
 
   it('execute completes previous animation before starting new one (key repeat)', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     orchestrator.execute('test_j', { count = 1 })

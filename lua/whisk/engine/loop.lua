@@ -1,6 +1,6 @@
-local traits = require("luxmotion.registry.traits")
-local pool = require("luxmotion.engine.pool")
-local performance = require("luxmotion.performance")
+local traits = require("whisk.registry.traits")
+local pool = require("whisk.engine.pool")
+local performance = require("whisk.performance")
 
 local M = {}
 

@@ -8,8 +8,8 @@ local function test_shims()
   local original_execute
 
   local function setup_mock()
-    require("luxmotion").setup()
-    local orchestrator = require("luxmotion.engine.orchestrator")
+    require("whisk").setup()
+    local orchestrator = require("whisk.engine.orchestrator")
     original_execute = orchestrator.execute
     orchestrator.execute = function(motion_id, input)
       table.insert(orchestrator_calls, { motion_id = motion_id, input = input })
@@ -17,7 +17,7 @@ local function test_shims()
   end
 
   local function teardown_mock()
-    local orchestrator = require("luxmotion.engine.orchestrator")
+    local orchestrator = require("whisk.engine.orchestrator")
     orchestrator.execute = original_execute
     orchestrator_calls = {}
   end
@@ -44,7 +44,7 @@ local function test_shims()
 
   setup_mock()
 
-  local cursor_keymaps = require("luxmotion.cursor.keymaps")
+  local cursor_keymaps = require("whisk.cursor.keymaps")
 
   cursor_keymaps.smooth_move("j", 5)
   assert_call("basic_j", { count = 5, direction = "j" }, "cursor.smooth_move('j', 5)")
@@ -118,7 +118,7 @@ local function test_shims()
   cursor_keymaps.smooth_screen_line_move("gk", 3)
   assert_call("screen_gk", { count = 3, direction = "gk" }, "cursor.smooth_screen_line_move('gk', 3)")
 
-  local scroll_keymaps = require("luxmotion.scroll.keymaps")
+  local scroll_keymaps = require("whisk.scroll.keymaps")
 
   scroll_keymaps.smooth_scroll("ctrl_d", 1)
   assert_call("scroll_ctrl_d", { count = 1, direction = "ctrl_d" }, "scroll.smooth_scroll('ctrl_d', 1)")

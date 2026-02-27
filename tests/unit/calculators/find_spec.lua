@@ -16,7 +16,7 @@ describe('calculators/find', function()
       "the quick brown fox",
     })
     mocks.set_cursor(1, 0)
-    find = require('luxmotion.calculators.find')
+    find = require('whisk.calculators.find')
   end)
 
   it('exports f, F, t, T functions', function()

@@ -13,9 +13,9 @@ describe('registry/builtin', function()
     mocks.setup()
     mocks.clear_package_cache()
 
-    motions = require('luxmotion.registry.motions')
-    traits = require('luxmotion.registry.traits')
-    builtin = require('luxmotion.registry.builtin')
+    motions = require('whisk.registry.motions')
+    traits = require('whisk.registry.traits')
+    builtin = require('whisk.registry.builtin')
 
     motions.clear()
     traits.clear()
@@ -184,7 +184,7 @@ describe('registry/builtin', function()
     mocks.set_window_size(40, 120)
 
     local cursor_trait = traits.get('cursor')
-    local Context = require('luxmotion.context.Context')
+    local Context = require('whisk.context.Context')
     local ctx = Context.new(1, 1000)
     ctx.cursor = { line = 1, col = 0 }
 
@@ -205,7 +205,7 @@ describe('registry/builtin', function()
     mocks.set_window_size(40, 120)
 
     local scroll_trait = traits.get('scroll')
-    local Context = require('luxmotion.context.Context')
+    local Context = require('whisk.context.Context')
     local ctx = Context.new(1, 1000)
     ctx.viewport = { topline = 1 }
 
@@ -236,7 +236,7 @@ describe('registry/builtin', function()
     mocks.set_window_size(40, 120)
 
     local cursor_trait = traits.get('cursor')
-    local Context = require('luxmotion.context.Context')
+    local Context = require('whisk.context.Context')
     local ctx = Context.new(1, 1000)
     ctx.cursor = { line = 1, col = 0 }
 

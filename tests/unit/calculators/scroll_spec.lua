@@ -20,7 +20,7 @@ describe('calculators/scroll', function()
     mocks.set_window_size(20, 80)
     mocks.set_topline(40)
 
-    scroll = require('luxmotion.calculators.scroll')
+    scroll = require('whisk.calculators.scroll')
   end)
 
   it('exports scroll functions', function()

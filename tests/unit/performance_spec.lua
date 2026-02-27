@@ -11,7 +11,7 @@ describe('performance', function()
     mocks.setup()
     mocks.clear_package_cache()
     mocks.set_buffer_content({ "line 1", "line 2", "line 3" })
-    performance = require('luxmotion.performance')
+    performance = require('whisk.performance')
     performance.disable()
   end)
 
@@ -48,7 +48,7 @@ describe('performance', function()
   end)
 
   it('get_frame_interval returns 33ms when active with reduce_frame_rate', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ performance = { reduce_frame_rate = true } })
     performance.enable()
     local interval = performance.get_frame_interval()
@@ -88,7 +88,7 @@ describe('performance', function()
   end)
 
   it('should_auto_enable respects config threshold', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ performance = { large_file_threshold = 100 } })
 
     local content = {}
@@ -101,7 +101,7 @@ describe('performance', function()
   end)
 
   it('should_auto_enable returns false when auto_enable disabled', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ performance = { auto_enable_on_large_files = false } })
 
     local large_content = {}
@@ -114,7 +114,7 @@ describe('performance', function()
   end)
 
   it('auto_toggle enables for large files', function()
-    local config = require('luxmotion.config')
+    local config = require('whisk.config')
     config.update({ performance = { auto_enable_on_large_files = true, large_file_threshold = 100 } })
 
     local content = {}
