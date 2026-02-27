@@ -45,7 +45,7 @@ lua/whisk/
     word.lua                  w, b, e, W, B, E (native delegation)
     find.lua                  f, F, t, T (native delegation, requires char)
     text_object.lua           {, }, (, ), % (native delegation)
-    line.lua                  gg, G, | (direct math + viewport calculation)
+    line.lua                  gg, G (direct math + viewport calculation), | (direct math, cursor only)
     search.lua                n, N, gj, gk (native delegation; gj/gk are screen-line motions colocated here)
     scroll.lua                ctrl_d/u/f/b, zz/zt/zb (direct math)
 
@@ -291,7 +291,7 @@ When enabled, performance mode:
 - Conditionally disables syntax highlighting (`vim.bo.syntax = "off"`, restored on disable) when `disable_syntax_during_scroll` is set.
 - Reduces frame rate from 60fps to 30fps when both performance mode is active **and** `reduce_frame_rate` is set.
 - Populates a passive lookup table of ignored events (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`). Callers check `should_ignore_event(event)` to decide whether to skip logic — no autocmds are registered to intercept events.
-- Auto-toggles on `BufEnter`/`BufWinEnter` via `auto_toggle()`: enables for files exceeding `large_file_threshold` lines or when `performance.enabled` is `true` in config; disables otherwise.
+- Auto-toggles on `BufEnter`/`BufWinEnter` via `auto_toggle()`: enables when `performance.enabled` is `true` in config, or when `auto_enable_on_large_files` is `true` and the buffer exceeds `large_file_threshold` lines; disables otherwise.
 - Maintains a rolling window of the last 10 frame times for FPS calculation.
 - Exposes `get_frame_interval()` and `get_current_fps()` for introspection.
 
