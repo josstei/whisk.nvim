@@ -257,7 +257,7 @@ Traits are small apply functions that know how to write an interpolated frame to
 
 Traits also track per-trait animation state to enable domination (preventing overlapping animations of the same type).
 
-Trait definitions (stored in the traits registry) accept `on_start` and `on_complete` hooks alongside the `apply` function. These hooks live on the trait definition, not on animation objects. Animation objects in the pool carry `on_complete` and `on_cancel` callbacks that are set per-animation by the orchestrator — these are distinct from the trait-level hooks.
+Trait definitions (stored in the traits registry) accept `on_start` and `on_complete` hooks alongside the `apply` function. These hooks live on the trait definition, not on animation objects. Animation objects in the pool carry `on_complete` and `on_cancel` callback fields. The orchestrator sets `on_complete` per-animation; `on_cancel` is available for custom callers of `loop.start()` but is not set by the orchestrator itself. Both are distinct from the trait-level hooks.
 
 The traits module exposes two reset mechanisms:
 
