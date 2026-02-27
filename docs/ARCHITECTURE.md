@@ -244,7 +244,7 @@ Calculators receive a context and return a target:
 Two calculation strategies:
 
 - **Direct math** — basic, line, and scroll calculators compute targets arithmetically from context values.
-- **Native delegation** — word, find, search, and text object calculators execute `normal!` motions to find the accurate target, then restore the cursor before returning the result.
+- **Native delegation** — word, find, screen, search, and text object calculators execute `normal!` motions to find the accurate target, then restore the cursor before returning the result.
 
 ---
 
