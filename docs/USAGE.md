@@ -147,7 +147,7 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()              -- tear down keymaps, stop animations, clear registries
+whisk.reset()              -- tear down keymaps, stop animations, clear registries, remove lifecycle autocmds
 ```
 
 ### Performance module
@@ -160,6 +160,7 @@ performance.disable()
 performance.is_active()
 performance.get_current_fps()
 performance.get_frame_interval()
+performance.should_ignore_event(event)
 ```
 
 ---
@@ -219,6 +220,7 @@ end, { silent = true })
 - Word, find, screen, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before animating.
 - Visual mode is supported for all motions except `position_zz`, `position_zt`, and `position_zb` which are Normal mode only.
 - Animations are automatically cancelled when the buffer is deleted (`BufDelete`), the window is closed (`WinClosed`), or the buffer is left (`BufLeave`).
+- The animation engine uses an object pool (up to 10 reusable animation objects) to reduce garbage collection pressure during rapid motion sequences.
 
 ---
 
@@ -229,6 +231,8 @@ whisk.nvim was previously published as nvim-luxmotion. A deprecation shim is inc
 - `require("luxmotion")` forwards to `require("whisk")` with a warning.
 - All `:LuxMotion*` commands forward to their `:Whisk*` equivalents.
 - `g:luxmotion_auto_setup` forwards to `g:whisk_auto_setup`.
+
+The deprecated `whisk.cursor.keymaps` and `whisk.scroll.keymaps` modules also forward to the orchestrator with a deprecation warning. If your config references these modules, switch to `require("whisk.engine.orchestrator")` directly.
 
 The shim will be removed in a future release. Update your config to use `whisk` directly.
 

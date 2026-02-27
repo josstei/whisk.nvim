@@ -22,7 +22,7 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 - Works in Normal and Visual modes with count prefixes (position motions `zz`/`zt`/`zb` are Normal mode only)
 - Separate duration and easing for cursor vs scroll animations
 - Performance mode with automatic large file detection
-- Object pooling to minimize garbage collection
+- Object pooling (up to 10 reusable animation objects) to reduce garbage collection pressure
 - Extensible — define your own keymaps via the orchestrator API, or register custom motions and traits through the registry
 
 ---
@@ -84,7 +84,7 @@ require("whisk").setup({
     disable_syntax_during_scroll = true,
     ignore_events = { "WinScrolled", "CursorMoved", "CursorMovedI" },
     reduce_frame_rate = false,
-    frame_rate_threshold = 60,
+    frame_rate_threshold = 60,    -- reserved for future use
     auto_enable_on_large_files = true,
     large_file_threshold = 5000,
   },
@@ -128,7 +128,20 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()              -- tear down keymaps, stop animations, clear registries
+whisk.reset()              -- tear down keymaps, stop animations, clear registries, remove lifecycle autocmds
+```
+
+### Performance module
+
+```lua
+local performance = require("whisk.performance")
+
+performance.enable()
+performance.disable()
+performance.is_active()
+performance.get_current_fps()
+performance.get_frame_interval()
+performance.should_ignore_event(event)
 ```
 
 ### Manual motion execution
@@ -204,6 +217,15 @@ When enabled, performance mode:
 - Exposes a configurable `ignore_events` list (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`) for callers to check via `should_ignore_event()`
 
 Toggle at runtime with `:WhiskPerformanceToggle` or `require("whisk").toggle_performance()`.
+
+---
+
+## Behavior notes
+
+- If a motion category is disabled, whisk falls back to native `normal!` motion behavior.
+- When a new motion starts while any of its traits are already animating, **all** active animations complete instantly at their final positions before the new animation begins (domination).
+- Animations are automatically cancelled when the buffer is deleted (`BufDelete`), the window is closed (`WinClosed`), or the buffer is left (`BufLeave`).
+- `gg` with a count (e.g., `5gg`) goes to line N. `|` with a count (e.g., `5|`) goes to column N.
 
 ---
 

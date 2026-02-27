@@ -31,9 +31,9 @@ lua/whisk/
 
   registry/
     builtin.lua               Registers built-in traits and motions
-    motions.lua               Motion definition store
+    motions.lua               Motion definition store (tracks by category via internal categories table)
     traits.lua                Trait store and animation state
-    keymaps.lua               Keymap installation from registry
+    keymaps.lua               Keymap installation from registry (skips categories where config is false)
 
   context/
     Context.lua               Context class (buffer/window snapshot + methods)
@@ -67,8 +67,8 @@ lua/luxmotion/
   init.lua                    Deprecation shim (forwards to whisk with warning)
 
 plugin/
-  whisk.vim                   VimScript entry point (auto-setup, commands)
-  luxmotion.vim               Deprecation shim (forwards g:luxmotion_auto_setup and LuxMotion* commands)
+  whisk.vim                   VimScript entry point (auto-setup, Whisk* commands: Enable/Disable/Toggle, EnableCursor/DisableCursor, EnableScroll/DisableScroll, PerformanceEnable/PerformanceDisable/PerformanceToggle)
+  luxmotion.vim               Deprecation shim (coordinates via g:whisk_auto_setup variable, defines LuxMotion* command aliases)
 ```
 
 ---
@@ -98,7 +98,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  shim[plugin/luxmotion.vim] -.->|forwards g:luxmotion_auto_setup + LuxMotion* commands| plugin[plugin/whisk.vim]
+  shim[plugin/luxmotion.vim] -.->|coordinates via g:whisk_auto_setup + defines LuxMotion* aliases| plugin[plugin/whisk.vim]
   plugin --> init[whisk/init.lua]
   init --> config[config/*]
   init --> builtin[registry/builtin.lua]
@@ -141,7 +141,7 @@ Dashed lines indicate lazy `require()` calls (deferred to function call time rat
 2. Check category config (`cursor` or `scroll`) is enabled. If disabled, call `fallback()` which runs `normal! [count]<key>[char]` (count is only prepended when greater than 1).
 3. Check if any of the motion's traits are currently animating. If so, call `loop.complete_all()` to snap **all** active animations to their final positions (domination). The check is per-trait, but the effect is global.
 4. Build a context snapshot via `context.builder.build(input)`.
-5. Run the calculator. Exit early if no result or if the cursor hasn't moved.
+5. Run the calculator. Exit early if no result or if the cursor position hasn't changed. Note: the check compares cursor line/col only — viewport-only changes (e.g., topline shift with cursor stationary) will also exit early.
 6. Mark all motion traits as animating.
 7. Start the animation loop with the context, result, traits, duration, and easing. The `on_complete` callback clears all trait animating flags.
 
@@ -187,7 +187,7 @@ Each frame:
 
 1. Records frame time via `performance.record_frame_time()`.
 2. Iterates the frame queue in reverse for safe removal.
-3. If the context has an `is_valid` method, validates via `context:is_valid()`. If invalid, fires `on_cancel` with a reason string, removes the animation, and skips to the next entry.
+3. If `context.is_valid` is truthy (i.e., the field exists as a function), validates via `context:is_valid()`. If invalid, fires `on_cancel` with a reason string, removes the animation, and skips to the next entry.
 4. Computes `progress = elapsed / duration`, clamped to `[0, 1]`.
 5. Applies the easing function to get `eased` progress.
 6. Calls `interpolate_result()` to lerp cursor line/col and viewport topline between start and target.
@@ -195,9 +195,21 @@ Each frame:
 8. When `progress >= 1.0`: fires `on_complete`, removes from queue, releases animation object to pool.
 9. Reschedules itself if the queue is non-empty; otherwise stops.
 
-Frame interval is determined by `performance.get_frame_interval()`: 16ms (~60fps) normally, 33ms (~30fps) when both performance mode is active and `reduce_frame_rate` is enabled.
+Frame interval is determined by `performance.get_frame_interval()`: 16ms (~60fps) normally, 33ms (~30fps) when both performance mode is active and `reduce_frame_rate` is enabled. Durations are converted from milliseconds to nanoseconds internally (`duration * 1000000`) for use with `vim.loop.hrtime()`.
 
 **Easing functions:** `linear`, `ease-in`, `ease-out`, `ease-in-out`.
+
+**Additional loop exports:**
+
+| Function | Description |
+|----------|-------------|
+| `stop_all()` | Cancels all animations without firing `on_complete` (used by `init.reset()`) |
+| `complete_all()` | Snaps all animations to their final positions and fires `on_complete` (domination) |
+| `cancel_for_buffer(bufnr)` | Cancels animations targeting the specified buffer (used by lifecycle) |
+| `cancel_for_window(winid)` | Cancels animations targeting the specified window (used by lifecycle) |
+| `get_active_count()` | Returns the number of active animations in the frame queue |
+| `is_running()` | Returns whether the animation loop is currently running |
+| `force_process_frame()` | Triggers an immediate frame tick (useful for testing) |
 
 ### Object pool (`engine/pool.lua`)
 
@@ -206,6 +218,8 @@ Recycles animation table allocations to reduce garbage collection pressure.
 - Maximum pool size: 10 objects.
 - `acquire()` returns a pooled object or allocates a new one.
 - `release(animation)` resets all fields (numbers to 0, references to nil) and returns the object to the pool if under capacity.
+- `get_stats()` returns `{ pool_size, max_pool_size }` for introspection.
+- `clear()` empties the pool entirely.
 
 ### Lifecycle (`engine/lifecycle.lua`)
 
@@ -228,6 +242,11 @@ Traits are small apply functions that know how to write an interpolated frame to
 
 Traits also track per-trait animation state to enable domination (preventing overlapping animations of the same type).
 
+The traits module exposes two reset mechanisms:
+
+- `reset()` — resets all animation state flags to `false` but preserves trait definitions.
+- `clear()` — removes both definitions and state entirely (used by `init.reset()`).
+
 ---
 
 ## Calculators
@@ -244,7 +263,7 @@ Calculators receive a context and return a target:
 Two calculation strategies:
 
 - **Direct math** — basic, line, and scroll calculators compute targets arithmetically from context values.
-- **Native delegation** — word, find, search (including screen-line motions gj/gk), and text object calculators execute `normal!` motions to find the accurate target, then restore the cursor before returning the result.
+- **Native delegation** — word, find, search (including screen-line motions gj/gk), and text object calculators execute `normal!` motions to find the accurate target, then restore the cursor before returning the result. Note: `gj`/`gk` are colocated in `search.lua` for implementation convenience, but their motion IDs use a `screen_` prefix (`screen_gj`, `screen_gk`) and are registered under the `cursor` category.
 
 ---
 
@@ -255,7 +274,7 @@ When enabled, performance mode:
 - Conditionally disables syntax highlighting (`vim.bo.syntax = "off"`, restored on disable) when `disable_syntax_during_scroll` is set.
 - Reduces frame rate from 60fps to 30fps when both performance mode is active **and** `reduce_frame_rate` is set.
 - Populates a passive lookup table of ignored events (default: `WinScrolled`, `CursorMoved`, `CursorMovedI`). Callers check `should_ignore_event(event)` to decide whether to skip logic — no autocmds are registered to intercept events.
-- Auto-enables on `BufEnter`/`BufWinEnter` for files exceeding `large_file_threshold` lines.
+- Auto-toggles on `BufEnter`/`BufWinEnter` via `auto_toggle()`: enables for files exceeding `large_file_threshold` lines or when `performance.enabled` is `true` in config; disables otherwise.
 - Maintains a rolling window of the last 10 frame times for FPS calculation.
 - Exposes `get_frame_interval()` and `get_current_fps()` for introspection.
 
