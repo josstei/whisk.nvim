@@ -29,7 +29,7 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 
 ## Requirements
 
-- Neovim >= 0.7
+- Neovim >= 0.8
 
 ---
 

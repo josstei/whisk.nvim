@@ -271,4 +271,4 @@ The shim will be removed in a future release. Update your config to use `whisk` 
 
 ## Compatibility
 
-Requires Neovim >= 0.7.
+Requires Neovim >= 0.8.
