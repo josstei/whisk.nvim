@@ -208,7 +208,7 @@ describe('engine/orchestrator', function()
 
   it('execute detects change in viewport', function()
     local config = require('whisk.config')
-    config.update({ viewport = { topline = 0 } })
+    config.update({ scroll = { enabled = true } })
 
     motions.register({
       id = 'test_view_detect',
@@ -223,5 +223,27 @@ describe('engine/orchestrator', function()
 
     orchestrator.execute('test_view_detect', {})
     assert.is_true(loop.is_running())
+  end)
+
+  it('execute does not start loop when cursor and viewport unchanged', function()
+    local config = require('whisk.config')
+    config.update({ scroll = { enabled = true } })
+
+    motions.register({
+      id = 'test_view_unchanged',
+      keys = { 't' },
+      modes = { 'n' },
+      traits = { 'scroll' },
+      category = 'scroll',
+      calculator = function(ctx)
+        return {
+          cursor = { line = ctx.cursor.line, col = ctx.cursor.col },
+          viewport = { topline = ctx.viewport.topline },
+        }
+      end,
+    })
+
+    orchestrator.execute('test_view_unchanged', {})
+    assert.is_false(loop.is_running())
   end)
 end)
