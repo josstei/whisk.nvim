@@ -13,6 +13,13 @@ local function is_same_position(context, result)
   return context.cursor.line == result.cursor.line and context.cursor.col == result.cursor.col
 end
 
+local function is_same_viewport(context, result)
+  if not result.viewport or not result.viewport.topline then
+    return true
+  end
+  return context.viewport.topline == result.viewport.topline
+end
+
 function M.execute(motion_id, input)
   local motion = motions.get(motion_id)
   if not motion then
@@ -43,7 +50,7 @@ function M.execute(motion_id, input)
     return
   end
 
-  if is_same_position(context, result) then
+  if is_same_position(context, result) and is_same_viewport(context, result) then
     return
   end
 

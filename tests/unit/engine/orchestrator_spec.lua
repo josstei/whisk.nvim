@@ -205,4 +205,23 @@ describe('engine/orchestrator', function()
     assert.equals(cursor_after_second[1], 2)
     assert.is_true(loop.is_running())
   end)
+
+  it('execute detects change in viewport', function()
+    local config = require('whisk.config')
+    config.update({ viewport = { topline = 0 } })
+
+    motions.register({
+      id = 'test_view_detect',
+      keys = { 's' },
+      modes = { 'n' },
+      traits = { 'scroll' },
+      category = 'scroll',
+      calculator = function(_)
+        return { viewport = { topline = 50 } }
+      end,
+    })
+
+    orchestrator.execute('test_view_detect', {})
+    assert.is_true(loop.is_running())
+  end)
 end)
