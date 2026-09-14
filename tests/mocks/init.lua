@@ -101,6 +101,10 @@ function M.get_on_key_listeners()
   return vim_core.get_on_key_listeners()
 end
 
+function M.run_scheduled()
+  return vim_core.run_scheduled()
+end
+
 function M.press_key()
   for _, listener in pairs(vim_core.get_on_key_listeners()) do
     local returned = listener('x', 'x')

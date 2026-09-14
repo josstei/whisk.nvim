@@ -71,16 +71,15 @@ function M.execute(motion_id, input)
 end
 
 function M.fallback(motion, input)
-  local cmd = ""
+  local keys = ""
   if input.count and input.count > 1 then
-    cmd = tostring(input.count)
+    keys = tostring(input.count)
   end
-  cmd = cmd .. (input.direction or motion.keys[1])
+  keys = keys .. (input.direction or motion.keys[1])
   if input.char then
-    cmd = cmd .. input.char
+    keys = keys .. input.char
   end
-  local keys = vim.api.nvim_replace_termcodes(cmd, true, false, true)
-  vim.api.nvim_feedkeys(keys, "nx", false)
+  vim.cmd.normal({ vim.api.nvim_replace_termcodes(keys, true, false, true), bang = true })
 end
 
 return M

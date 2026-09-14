@@ -19,11 +19,14 @@ describe("Select mode", function()
     assert.equals(vim.api.nvim_get_current_line(), "print(hello, other)")
   end)
 
-  it("no motion key has a Select-mode mapping", function()
+  it("every motion key maps Visual mode and never Select mode", function()
     local checked = 0
     for id, motion in pairs(require("whisk.registry.motions").all()) do
       for _, key in ipairs(motion.keys) do
         assert.equals(vim.fn.maparg(key, "s"), "", key .. " (" .. id .. ") is mapped in Select mode")
+        if vim.tbl_contains(motion.modes, "x") then
+          assert.is_true(vim.fn.maparg(key, "x") ~= "", key .. " (" .. id .. ") is not mapped in Visual mode")
+        end
         checked = checked + 1
       end
     end
@@ -39,6 +42,7 @@ describe("Visual mode", function()
 
   it("motions extend the selection", function()
     harness.input("vjj")
+    assert.is_true(require("whisk.engine.loop").get_active_count() > 0, "whisk did not animate the Visual-mode j")
     harness.settle()
     assert.equals(vim.api.nvim_get_mode().mode, "v")
     assert.equals(vim.fn.line("v"), 1)

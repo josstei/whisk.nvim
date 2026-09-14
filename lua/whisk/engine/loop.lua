@@ -49,9 +49,28 @@ local function apply_frame(anim, progress)
   end
 end
 
-local function apply_committed(anim)
-  for _, trait_id in ipairs(anim.traits) do
-    traits.apply_frame(trait_id, anim.context, anim.result, 1.0)
+local function report(err)
+  vim.schedule(function()
+    vim.notify("whisk: " .. tostring(err), vim.log.levels.ERROR)
+  end)
+end
+
+local function land(anim)
+  local ok, err = pcall(function()
+    for _, trait_id in ipairs(anim.traits) do
+      traits.apply_frame(trait_id, anim.context, anim.result, 1.0)
+    end
+  end)
+
+  local view = anim.landing_view
+  if view then
+    vim.api.nvim_win_call(anim.context.winid, function()
+      vim.fn.winrestview(view)
+    end)
+  end
+
+  if not ok then
+    error(err, 0)
   end
 end
 
@@ -100,7 +119,7 @@ local function finish_where(predicate)
   local first_error = nil
   for _, anim in ipairs(finishing) do
     if anim.phase == "running" and anim.context:is_valid() then
-      local ok, err = pcall(apply_committed, anim)
+      local ok, err = pcall(land, anim)
       if not ok and not first_error then
         first_error = err
       end
@@ -119,6 +138,7 @@ local function run_frame()
   local now = vim.loop.hrtime()
   performance.record_frame_time()
   local running = false
+  local first_error = nil
 
   for i = #queue, 1, -1 do
     local anim = queue[i]
@@ -131,7 +151,10 @@ local function run_frame()
           progress = math.min((now - anim.start_time) / anim.duration_ns, 1.0)
         end
         if progress >= 1.0 then
-          apply_committed(anim)
+          local ok, err = pcall(land, anim)
+          if not ok and not first_error then
+            first_error = err
+          end
           discard(i)
         else
           apply_frame(anim, progress)
@@ -141,14 +164,22 @@ local function run_frame()
     end
   end
 
-  return running
+  return running, first_error
+end
+
+local function advance()
+  local running, err = run_frame()
+  if running then
+    schedule_tick()
+  end
+  if err then
+    report(err)
+  end
 end
 
 local function on_tick()
   tick_pending = false
-  if run_frame() then
-    schedule_tick()
-  end
+  advance()
 end
 
 schedule_tick = function()
@@ -164,7 +195,9 @@ local function begin_pending()
   for i = #queue, 1, -1 do
     local anim = queue[i]
     if anim.phase == "pending" then
-      if anim.context:is_valid() and still_committed(anim) and anim.context:restore_start() then
+      if anim.context:is_valid() and still_committed(anim) then
+        anim.landing_view = vim.api.nvim_win_call(anim.context.winid, vim.fn.winsaveview)
+        anim.context:restore_start()
         anim.phase = "running"
         anim.start_time = vim.loop.hrtime()
         started = true
@@ -183,7 +216,7 @@ local function guarded(fn)
   return function()
     local ok, err = pcall(fn)
     if not ok then
-      vim.notify("whisk: " .. tostring(err), vim.log.levels.ERROR)
+      report(err)
     end
   end
 end
@@ -256,9 +289,7 @@ function M.is_running()
 end
 
 function M.force_process_frame()
-  if run_frame() then
-    schedule_tick()
-  end
+  advance()
 end
 
 return M

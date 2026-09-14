@@ -106,6 +106,7 @@ describe('engine/loop', function()
 
   it('a key press finishes a running animation on the committed position', function()
     commit_and_start(20, 1000)
+    mocks.set_topline(7)
     mocks.trigger_autocmd('SafeState')
     mocks.execute_deferred(1)
     assert.is_true(mocks.get_cursor()[1] < 20)
@@ -113,7 +114,56 @@ describe('engine/loop', function()
     mocks.press_key()
 
     assert.equals(mocks.get_cursor()[1], 20)
+    assert.equals(mocks.get_fn_state().topline, 7)
     assert.equals(loop.get_active_count(), 0)
+  end)
+
+  it('a replay that finishes on its own lands on the view that was current at SafeState', function()
+    commit_and_start(20, 1000)
+    mocks.set_topline(9)
+    mocks.trigger_autocmd('SafeState')
+    assert.equals(mocks.get_fn_state().topline, 1)
+
+    run_deferred_from(1)
+
+    assert.equals(mocks.get_cursor()[1], 20)
+    assert.equals(mocks.get_fn_state().topline, 9)
+  end)
+
+  it('hooks are released after a replay finishes on its own', function()
+    commit_and_start(5, 150)
+    mocks.trigger_autocmd('SafeState')
+
+    run_deferred_from(1)
+
+    assert.equals(loop.get_active_count(), 0)
+    assert.equals(count_pairs(mocks.get_on_key_listeners()), 0)
+    assert.equals(mocks.count_autocmds('SafeState'), 0)
+  end)
+
+  it('an animation queued while another replays waits for the next SafeState', function()
+    commit_and_start(20, 1000)
+    mocks.trigger_autocmd('SafeState')
+    assert.equals(mocks.count_autocmds('SafeState'), 0)
+
+    local second = builder.build({})
+    loop.start({ context = second, result = { cursor = { line = 10, col = 0 } }, traits = { 'cursor' }, duration = 1000, easing = 'linear' })
+
+    assert.equals(mocks.count_autocmds('SafeState'), 1)
+  end)
+
+  it('a frame tick left over from a finished replay leaves a new pending animation untouched', function()
+    commit_and_start(20, 1000)
+    mocks.trigger_autocmd('SafeState')
+    loop.complete_all()
+    commit_and_start(1, 1000)
+
+    mocks.execute_deferred(1)
+
+    assert.equals(loop.get_active_count(), 1)
+    assert.equals(mocks.get_cursor()[1], 1)
+    mocks.trigger_autocmd('SafeState')
+    assert.equals(mocks.get_cursor()[1], 20)
   end)
 
   it('a key press before SafeState drops the pending animation without moving the cursor', function()
@@ -177,6 +227,8 @@ describe('engine/loop', function()
       mocks.press_key()
     end)
 
+    assert.equals(#mocks.get_notifications(), 0, 'reporting inside on_key would show a message before the key runs')
+    mocks.run_scheduled()
     local notifications = mocks.get_notifications()
     assert.equals(#notifications, 1)
     assert.matches(notifications[1].msg, 'trait exploded')

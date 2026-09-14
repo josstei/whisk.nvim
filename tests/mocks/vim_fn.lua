@@ -127,7 +127,10 @@ function M.create()
       end
       if view.lnum then
         local api = get_api_state()
-        api.cursor = { view.lnum, view.col or api.cursor[2] }
+        local line = math.max(1, math.min(view.lnum, #api.buffer_lines))
+        local line_len = #(api.buffer_lines[line] or "")
+        local col = math.max(0, math.min(view.col or api.cursor[2], math.max(0, line_len - 1)))
+        api.cursor = { line, col }
       end
     end,
 

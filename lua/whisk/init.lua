@@ -36,13 +36,16 @@ end
 
 function M.reset()
   keymaps.clear()
-  loop.complete_all()
+  local landed, landing_error = pcall(loop.complete_all)
   traits.clear()
   motions.clear()
   lifecycle.teardown()
   local performance = require("whisk.performance")
   performance.teardown()
   initialized = false
+  if not landed then
+    error(landing_error, 0)
+  end
 end
 
 function M.enable()

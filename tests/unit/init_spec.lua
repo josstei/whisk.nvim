@@ -185,6 +185,40 @@ describe('init (main module)', function()
     assert.equals(require('whisk.engine.loop').get_active_count(), 0)
   end)
 
+  it('reset finishes tearing down before raising a landing error', function()
+    mocks.set_buffer_content({ 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10' })
+    whisk.setup({})
+    local fail = false
+    require('whisk.registry.traits').register({
+      id = 'fails_on_landing',
+      apply = function(_, _, progress)
+        if fail and progress == 1.0 then
+          error('landing failed')
+        end
+      end,
+    })
+    local motions = require('whisk.registry.motions')
+    local basic_j = motions.get('basic_j')
+    motions.register({
+      id = 'failing_j',
+      keys = { 'J' },
+      traits = { 'cursor', 'fails_on_landing' },
+      category = 'cursor',
+      calculator = basic_j.calculator,
+    })
+    require('whisk.engine.orchestrator').execute('failing_j', { count = 5, direction = 'j' })
+    mocks.trigger_autocmd('SafeState')
+    fail = true
+
+    assert.throws(function()
+      whisk.reset()
+    end, 'landing failed')
+
+    assert.is_false(require('whisk.engine.lifecycle').is_active())
+    assert.is_nil(require('whisk.registry.motions').get('basic_j'))
+    assert.equals(require('whisk.engine.loop').get_active_count(), 0)
+  end)
+
   it('setup refuses to install on Neovim older than 0.10', function()
     mocks.set_feature('nvim-0.10', 0)
 
