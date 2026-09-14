@@ -19,7 +19,8 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 | Screen Lines | `gj`, `gk` |
 | Viewport | `<C-d>`, `<C-u>`, `<C-f>`, `<C-b>`, `zz`, `zt`, `zb` |
 
-- Works in Normal and Visual modes with count prefixes (position motions `zz`/`zt`/`zb` are Normal mode only)
+- Works in Normal and Visual modes with count prefixes (position motions `zz`/`zt`/`zb` are Normal mode only); Select mode is never mapped, so typing over snippet placeholders is unaffected
+- Motions take effect immediately and the animation replays afterwards, so macros, `:normal`, and fast typing always act on the final position
 - Separate duration and easing for cursor vs scroll animations
 - Performance mode with automatic large file detection
 - Object pooling (up to 10 reusable animation objects) to reduce garbage collection pressure
@@ -29,7 +30,7 @@ Smooth motion animations for Neovim. Provides 60fps fluid animations for cursor 
 
 ## Requirements
 
-- Neovim >= 0.8
+- Neovim >= 0.10
 
 ---
 
@@ -131,7 +132,7 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()              -- tear down keymaps, stop animations, clear registries, remove lifecycle autocmds
+whisk.reset()              -- tear down keymaps, finish animations at their targets, clear registries, remove lifecycle autocmds
 ```
 
 ### Performance module
@@ -226,8 +227,9 @@ Toggle at runtime with `:WhiskPerformanceToggle` or `require("whisk").toggle_per
 ## Behavior notes
 
 - If a motion category is disabled, whisk falls back to native `normal!` motion behavior.
-- When a new motion starts while any of its traits are already animating, **all** active animations complete instantly at their final positions before the new animation begins (domination).
-- Animations are automatically cancelled when the buffer is deleted (`BufDelete`), the window is closed (`WinClosed`), or the buffer is left (`BufLeave`).
+- A motion takes effect before its mapping returns: the cursor and view are already at the target, so macros, `:normal`, `feedkeys()`, and code that reads the cursor afterwards all see the final position. The animation replays the movement once Neovim is idle.
+- Pressing any key while an animation plays finishes it at the target before the key runs. Animations are skipped while a macro is replaying or more keys are already queued.
+- Leaving or deleting the buffer, or closing its window, ends the animation at its target.
 - `gg` with a count (e.g., `5gg`) goes to line N. `|` with a count (e.g., `5|`) goes to column N.
 
 ---
