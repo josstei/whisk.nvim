@@ -166,13 +166,15 @@ describe('registry/builtin', function()
     end
   end)
 
-  it('motions have valid modes', function()
+  it('motions map only Normal and Visual modes', function()
     builtin.register_motions()
 
-    local all = motions.all()
-    for id, motion in pairs(all) do
-      assert.is_type(motion.modes, 'table', 'Motion ' .. id .. ' has invalid modes')
+    local allowed = { n = true, x = true }
+    for id, motion in pairs(motions.all()) do
       assert.greater_than(#motion.modes, 0, 'Motion ' .. id .. ' has no modes')
+      for _, mode in ipairs(motion.modes) do
+        assert.is_true(allowed[mode] == true, 'Motion ' .. id .. ' maps mode ' .. mode)
+      end
     end
   end)
 

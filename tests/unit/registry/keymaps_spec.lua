@@ -47,13 +47,12 @@ describe('registry/keymaps', function()
     assert.has_key(registered, 'n:j')
   end)
 
-  it('setup creates keymaps for multiple modes', function()
+  it('a motion registered without modes maps Normal and Visual but never Select', function()
     config.update({ keymaps = { cursor = true } })
 
     motions.register({
       id = 'test_k',
       keys = { 'k' },
-      modes = { 'n', 'v' },
       traits = { 'cursor' },
       category = 'cursor',
       calculator = function() return {} end,
@@ -64,7 +63,9 @@ describe('registry/keymaps', function()
 
     local registered = mocks.get_keymaps()
     assert.has_key(registered, 'n:k')
-    assert.has_key(registered, 'v:k')
+    assert.has_key(registered, 'x:k')
+    assert.is_nil(registered['v:k'], 'v also maps Select mode')
+    assert.is_nil(registered['s:k'], 'Select mode must stay unmapped')
   end)
 
   it('setup creates keymaps for multiple keys', function()
@@ -142,7 +143,7 @@ describe('registry/keymaps', function()
     motions.register({
       id = 'test_clear',
       keys = { 'y' },
-      modes = { 'n', 'v' },
+      modes = { 'n', 'x' },
       traits = { 'cursor' },
       category = 'cursor',
       calculator = function() return {} end,
