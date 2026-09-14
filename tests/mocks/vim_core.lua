@@ -8,6 +8,7 @@ local state = {
   deferred_calls = {},
   scheduled_calls = {},
   hrtime_value = 0,
+  on_key_listeners = {},
 }
 
 function M.reset()
@@ -19,7 +20,12 @@ function M.reset()
     deferred_calls = {},
     scheduled_calls = {},
     hrtime_value = 0,
+    on_key_listeners = {},
   }
+end
+
+function M.get_on_key_listeners()
+  return state.on_key_listeners
 end
 
 function M.get_state()
@@ -61,8 +67,29 @@ function M.advance_hrtime(delta_ns)
   state.hrtime_value = state.hrtime_value + delta_ns
 end
 
-M.cmd = function(command)
-  table.insert(state.commands, command)
+M.cmd = setmetatable({}, {
+  __call = function(_, command)
+    table.insert(state.commands, command)
+  end,
+  __index = function(_, name)
+    return function(spec)
+      local args = type(spec) == 'table' and spec or { spec }
+      local text = name .. (args.bang and '!' or '')
+      if args[1] ~= nil then
+        text = text .. ' ' .. table.concat(args, ' ')
+      end
+      table.insert(state.commands, text)
+    end
+  end,
+})
+
+function M.run_scheduled()
+  local pending = state.scheduled_calls
+  state.scheduled_calls = {}
+  for _, fn in ipairs(pending) do
+    fn()
+  end
+  return #pending
 end
 
 M.notify = function(msg, level, opts)
@@ -75,7 +102,6 @@ end
 
 M.schedule = function(fn)
   table.insert(state.scheduled_calls, fn)
-  fn()
 end
 
 M.defer_fn = function(fn, delay)
@@ -83,6 +109,15 @@ M.defer_fn = function(fn, delay)
     fn = fn,
     delay = delay,
   })
+end
+
+M.on_key = function(fn, ns_id)
+  if fn == nil then
+    state.on_key_listeners[ns_id] = nil
+  else
+    state.on_key_listeners[ns_id] = fn
+  end
+  return ns_id
 end
 
 M.keymap = {

@@ -16,6 +16,7 @@ function M.setup()
     notify = vim_core.notify,
     schedule = vim_core.schedule,
     defer_fn = vim_core.defer_fn,
+    on_key = vim_core.on_key,
     keymap = vim_core.keymap,
     deepcopy = vim_core.deepcopy,
     tbl_deep_extend = vim_core.tbl_deep_extend,
@@ -94,6 +95,47 @@ end
 
 function M.execute_deferred(index)
   return vim_core.execute_deferred(index)
+end
+
+function M.get_on_key_listeners()
+  return vim_core.get_on_key_listeners()
+end
+
+function M.run_scheduled()
+  return vim_core.run_scheduled()
+end
+
+function M.press_key()
+  for _, listener in pairs(vim_core.get_on_key_listeners()) do
+    local returned = listener('x', 'x')
+    if returned ~= nil then
+      error('on_key listeners must not return a value; Neovim removes listeners that do')
+    end
+  end
+end
+
+function M.trigger_autocmd(event, args)
+  return vim_api.trigger_autocmd(event, args)
+end
+
+function M.count_autocmds(event)
+  return vim_api.count_autocmds(event)
+end
+
+function M.set_changedtick(tick)
+  vim_api.set_changedtick(tick)
+end
+
+function M.set_editor_state(value)
+  vim_fn.set_editor_state(value)
+end
+
+function M.set_reg_executing(value)
+  vim_fn.set_reg_executing(value)
+end
+
+function M.set_feature(feature, value)
+  vim_fn.set_feature(feature, value)
 end
 
 function M.clear_package_cache()

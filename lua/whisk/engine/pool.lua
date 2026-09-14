@@ -10,28 +10,30 @@ function M.acquire()
     return table.remove(animation_pool)
   else
     return {
+      phase = nil,
       start_time = 0,
       duration_ns = 0,
       easing_fn = nil,
       context = nil,
       result = nil,
       traits = nil,
-      on_complete = nil,
-      on_cancel = nil,
+      committed = nil,
+      landing_view = nil,
     }
   end
 end
 
 function M.release(animation)
   if pool_size < MAX_POOL_SIZE then
+    animation.phase = nil
     animation.start_time = 0
     animation.duration_ns = 0
     animation.easing_fn = nil
     animation.context = nil
     animation.result = nil
     animation.traits = nil
-    animation.on_complete = nil
-    animation.on_cancel = nil
+    animation.committed = nil
+    animation.landing_view = nil
     pool_size = pool_size + 1
     table.insert(animation_pool, animation)
   end

@@ -3,11 +3,28 @@ local M = {}
 local motions = {}
 local categories = {}
 
+local allowed_modes = { n = true, x = true }
+
+local function validate_modes(id, modes)
+  for _, mode in ipairs(modes) do
+    if not allowed_modes[mode] then
+      error(string.format(
+        'whisk: motion "%s" maps mode "%s"; only "n" (Normal) and "x" (Visual) are allowed. "v" also maps Select mode, where typed keys must insert text.',
+        tostring(id),
+        tostring(mode)
+      ), 3)
+    end
+  end
+end
+
 function M.register(definition)
+  local modes = definition.modes or { "n", "x" }
+  validate_modes(definition.id, modes)
+
   local motion = {
     id = definition.id,
     keys = definition.keys,
-    modes = definition.modes or { "n", "v" },
+    modes = modes,
     traits = definition.traits,
     category = definition.category,
     calculator = definition.calculator,

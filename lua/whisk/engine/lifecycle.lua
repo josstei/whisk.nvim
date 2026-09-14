@@ -10,7 +10,7 @@ function M.setup()
   vim.api.nvim_create_autocmd('BufDelete', {
     group = autocmd_group,
     callback = function(args)
-      loop.cancel_for_buffer(args.buf)
+      loop.complete_for_buffer(args.buf)
     end,
   })
 
@@ -19,7 +19,7 @@ function M.setup()
     callback = function(args)
       local winid = tonumber(args.match)
       if winid then
-        loop.cancel_for_window(winid)
+        loop.complete_for_window(winid)
       end
     end,
   })
@@ -27,7 +27,7 @@ function M.setup()
   vim.api.nvim_create_autocmd('BufLeave', {
     group = autocmd_group,
     callback = function(args)
-      loop.cancel_for_buffer(args.buf)
+      loop.complete_for_buffer(args.buf)
     end,
   })
 end

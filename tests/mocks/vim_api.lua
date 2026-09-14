@@ -13,6 +13,9 @@ local state = {
   augroups = {},
   augroup_id = 0,
   fed_keys = {},
+  namespaces = {},
+  namespace_id = 0,
+  changedtick = 1,
 }
 
 function M.reset()
@@ -29,7 +32,59 @@ function M.reset()
     augroups = {},
     augroup_id = 0,
     fed_keys = {},
+    namespaces = {},
+    namespace_id = 0,
+    changedtick = 1,
   }
+end
+
+function M.set_changedtick(tick)
+  state.changedtick = tick
+end
+
+local function autocmd_matches(autocmd, event)
+  if type(autocmd.events) == 'table' then
+    for _, candidate in ipairs(autocmd.events) do
+      if candidate == event then
+        return true
+      end
+    end
+    return false
+  end
+  return autocmd.events == event
+end
+
+function M.trigger_autocmd(event, args)
+  local matching = {}
+  for _, autocmd in ipairs(state.autocmds) do
+    if autocmd_matches(autocmd, event) then
+      table.insert(matching, autocmd)
+    end
+  end
+  for _, autocmd in ipairs(matching) do
+    if autocmd.opts and autocmd.opts.once then
+      for i, candidate in ipairs(state.autocmds) do
+        if candidate == autocmd then
+          table.remove(state.autocmds, i)
+          break
+        end
+      end
+    end
+    if autocmd.opts and autocmd.opts.callback then
+      autocmd.opts.callback(args or {})
+    end
+  end
+  return #matching
+end
+
+function M.count_autocmds(event)
+  local count = 0
+  for _, autocmd in ipairs(state.autocmds) do
+    if autocmd_matches(autocmd, event) then
+      count = count + 1
+    end
+  end
+  return count
 end
 
 function M.get_state()
@@ -128,6 +183,18 @@ function M.create()
 
     nvim_create_augroup = function(name, opts)
       return name
+    end,
+
+    nvim_create_namespace = function(name)
+      if not state.namespaces[name] then
+        state.namespace_id = state.namespace_id + 1
+        state.namespaces[name] = state.namespace_id
+      end
+      return state.namespaces[name]
+    end,
+
+    nvim_buf_get_changedtick = function(bufnr)
+      return state.changedtick
     end,
 
     nvim_buf_get_option = function(bufnr, option)

@@ -17,11 +17,8 @@ describe('registry/traits', function()
   it('exports all required functions', function()
     assert.is_type(traits.register, 'function')
     assert.is_type(traits.get, 'function')
-    assert.is_type(traits.is_animating, 'function')
-    assert.is_type(traits.set_animating, 'function')
     assert.is_type(traits.apply_frame, 'function')
     assert.is_type(traits.all, 'function')
-    assert.is_type(traits.reset, 'function')
     assert.is_type(traits.clear, 'function')
   end)
 
@@ -58,32 +55,6 @@ describe('registry/traits', function()
   it('get returns nil for unknown trait', function()
     local trait = traits.get('unknown')
     assert.is_nil(trait)
-  end)
-
-  it('is_animating returns false initially', function()
-    traits.register({
-      id = 'cursor',
-      apply = function() end,
-    })
-
-    assert.is_false(traits.is_animating('cursor'))
-  end)
-
-  it('set_animating updates animating state', function()
-    traits.register({
-      id = 'cursor',
-      apply = function() end,
-    })
-
-    traits.set_animating('cursor', true)
-    assert.is_true(traits.is_animating('cursor'))
-
-    traits.set_animating('cursor', false)
-    assert.is_false(traits.is_animating('cursor'))
-  end)
-
-  it('is_animating returns false for unregistered trait', function()
-    assert.is_false(traits.is_animating('nonexistent'))
   end)
 
   it('apply_frame calls trait apply function', function()
@@ -127,27 +98,12 @@ describe('registry/traits', function()
     assert.has_key(all, 'trait3')
   end)
 
-  it('reset clears all animating states', function()
-    traits.register({ id = 'cursor', apply = function() end })
-    traits.register({ id = 'scroll', apply = function() end })
-
-    traits.set_animating('cursor', true)
-    traits.set_animating('scroll', true)
-
-    traits.reset()
-
-    assert.is_false(traits.is_animating('cursor'))
-    assert.is_false(traits.is_animating('scroll'))
-  end)
-
-  it('clear removes all traits and states', function()
+  it('clear removes all traits', function()
     traits.register({ id = 'trait1', apply = function() end })
-    traits.set_animating('trait1', true)
 
     traits.clear()
 
     assert.is_nil(traits.get('trait1'))
-    assert.is_false(traits.is_animating('trait1'))
   end)
 
   it('register overwrites existing trait', function()
@@ -159,23 +115,6 @@ describe('registry/traits', function()
 
     local trait = traits.get('same')
     assert.equals(trait.apply, fn2)
-  end)
-
-  it('multiple traits can have independent states', function()
-    traits.register({ id = 'cursor', apply = function() end })
-    traits.register({ id = 'scroll', apply = function() end })
-
-    traits.set_animating('cursor', true)
-    traits.set_animating('scroll', false)
-
-    assert.is_true(traits.is_animating('cursor'))
-    assert.is_false(traits.is_animating('scroll'))
-
-    traits.set_animating('cursor', false)
-    traits.set_animating('scroll', true)
-
-    assert.is_false(traits.is_animating('cursor'))
-    assert.is_true(traits.is_animating('scroll'))
   end)
 
   it('trait with on_start callback', function()

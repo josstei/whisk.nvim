@@ -29,7 +29,6 @@ function M.register_motions()
     motions.register({
       id = "basic_" .. dir,
       keys = { dir },
-      modes = { "n", "v" },
       traits = { "cursor" },
       category = "cursor",
       calculator = calculators.basic[dir],
@@ -41,7 +40,6 @@ function M.register_motions()
   motions.register({
     id = "basic_0",
     keys = { "0" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.basic["0"],
@@ -51,7 +49,6 @@ function M.register_motions()
   motions.register({
     id = "basic_$",
     keys = { "$" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.basic["$"],
@@ -62,7 +59,6 @@ function M.register_motions()
     motions.register({
       id = "word_" .. dir,
       keys = { dir },
-      modes = { "n", "v" },
       traits = { "cursor" },
       category = "cursor",
       calculator = calculators.word[dir],
@@ -75,7 +71,6 @@ function M.register_motions()
     motions.register({
       id = "find_" .. dir,
       keys = { dir },
-      modes = { "n", "v" },
       traits = { "cursor" },
       category = "cursor",
       calculator = calculators.find[dir],
@@ -95,7 +90,6 @@ function M.register_motions()
     motions.register({
       id = "text_object_" .. key,
       keys = { key },
-      modes = { "n", "v" },
       traits = { "cursor" },
       category = "cursor",
       calculator = calculators.text_object[key],
@@ -107,7 +101,6 @@ function M.register_motions()
   motions.register({
     id = "line_gg",
     keys = { "gg" },
-    modes = { "n", "v" },
     traits = { "cursor", "scroll" },
     category = "cursor",
     calculator = calculators.line.gg,
@@ -118,7 +111,6 @@ function M.register_motions()
   motions.register({
     id = "line_G",
     keys = { "G" },
-    modes = { "n", "v" },
     traits = { "cursor", "scroll" },
     category = "cursor",
     calculator = calculators.line.G,
@@ -129,7 +121,6 @@ function M.register_motions()
   motions.register({
     id = "line_|",
     keys = { "|" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.line["|"],
@@ -140,7 +131,6 @@ function M.register_motions()
   motions.register({
     id = "search_n",
     keys = { "n" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.search.n,
@@ -151,7 +141,6 @@ function M.register_motions()
   motions.register({
     id = "search_N",
     keys = { "N" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.search.N,
@@ -162,7 +151,6 @@ function M.register_motions()
   motions.register({
     id = "screen_gj",
     keys = { "gj" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.search.gj,
@@ -173,7 +161,6 @@ function M.register_motions()
   motions.register({
     id = "screen_gk",
     keys = { "gk" },
-    modes = { "n", "v" },
     traits = { "cursor" },
     category = "cursor",
     calculator = calculators.search.gk,
@@ -184,7 +171,6 @@ function M.register_motions()
   motions.register({
     id = "scroll_ctrl_d",
     keys = { "<C-d>" },
-    modes = { "n", "v" },
     traits = { "cursor", "scroll" },
     category = "scroll",
     calculator = calculators.scroll.ctrl_d,
@@ -195,7 +181,6 @@ function M.register_motions()
   motions.register({
     id = "scroll_ctrl_u",
     keys = { "<C-u>" },
-    modes = { "n", "v" },
     traits = { "cursor", "scroll" },
     category = "scroll",
     calculator = calculators.scroll.ctrl_u,
@@ -206,7 +191,6 @@ function M.register_motions()
   motions.register({
     id = "scroll_ctrl_f",
     keys = { "<C-f>" },
-    modes = { "n", "v" },
     traits = { "cursor", "scroll" },
     category = "scroll",
     calculator = calculators.scroll.ctrl_f,
@@ -217,7 +201,6 @@ function M.register_motions()
   motions.register({
     id = "scroll_ctrl_b",
     keys = { "<C-b>" },
-    modes = { "n", "v" },
     traits = { "cursor", "scroll" },
     category = "scroll",
     calculator = calculators.scroll.ctrl_b,

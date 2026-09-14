@@ -14,9 +14,12 @@ Use your preferred plugin manager. The plugin auto-calls `require("whisk").setup
 {
   "josstei/whisk.nvim",
   event = "VeryLazy",
+  init = function() vim.g.whisk_auto_setup = 0 end,
   opts = {},
 }
 ```
+
+The `init` hook turns off the built-in auto-setup so `opts` is the only call to `setup()`.
 
 ### vim-plug
 
@@ -147,7 +150,7 @@ whisk.disable_scroll()
 
 whisk.toggle_performance()
 
-whisk.reset()              -- tear down keymaps, stop animations, clear all registries (including custom), remove lifecycle autocmds
+whisk.reset()              -- tear down keymaps, finish animations at their targets, clear all registries (including custom), remove lifecycle autocmds
 ```
 
 ### Performance module
@@ -236,6 +239,8 @@ builtin.register_motions()   -- register only built-in motions
 keymaps.create_handler(motion)  -- generate a keymap handler for a registered motion
 ```
 
+`modes` defaults to `{ "n", "x" }` (Normal and Visual). `register` raises an error for any other mode: `"v"` would also map Select mode, where typed keys must replace the selection (for example snippet placeholders).
+
 Note: `whisk.reset()` clears all registered motions and traits, including custom ones. Re-register after calling `reset()` or `setup()`.
 
 ---
@@ -243,10 +248,11 @@ Note: `whisk.reset()` clears all registered motions and traits, including custom
 ## Behavior notes
 
 - If a motion category is disabled, whisk falls back to native `normal!` motion behavior.
-- When a new motion starts while any of its traits are already animating, **all** active animations (not just the conflicting ones) complete instantly at their final positions before the new animation begins (domination).
-- Word, find, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before animating. Screen-line motions (`gj`/`gk`) also use native delegation and are colocated in the search calculator module.
-- Visual mode is supported for all motions except `position_zz`, `position_zt`, and `position_zb` which are Normal mode only.
-- Animations are automatically cancelled when the buffer is deleted (`BufDelete`), the window is closed (`WinClosed`), or the buffer is left (`BufLeave`).
+- A motion takes effect before its mapping returns: the cursor and view are already at the target, so macros, `:normal`, `feedkeys()`, and code that reads the cursor afterwards all see the final position. The animation replays the movement once Neovim is idle (`SafeState`).
+- Pressing any key while an animation plays finishes it at the target before the key runs. Starting another motion does the same. Animations are skipped while a macro is replaying or more keys are already queued.
+- Word, find, search, and text object calculators delegate to native `normal!` motions for accuracy, then restore the cursor before the result is committed. Screen-line motions (`gj`/`gk`) also use native delegation and are colocated in the search calculator module.
+- Visual mode is supported for all motions except `position_zz`, `position_zt`, and `position_zb` which are Normal mode only. Select mode is never mapped.
+- Leaving the buffer (`BufLeave`), deleting it (`BufDelete`), or closing its window (`WinClosed`) ends the animation at its target.
 - The animation engine uses an object pool (up to 10 reusable animation objects) to reduce garbage collection pressure during rapid motion sequences.
 
 ---
@@ -271,4 +277,4 @@ The shim will be removed in a future release. Update your config to use `whisk` 
 
 ## Compatibility
 
-Requires Neovim >= 0.8.
+Requires Neovim >= 0.10. `setup()` reports an error and installs nothing on older versions, because the animation engine depends on the `SafeState` event and `state()`.

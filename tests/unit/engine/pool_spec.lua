@@ -71,7 +71,8 @@ describe('engine/pool', function()
     obj.context = { foo = 'bar' }
     obj.result = { baz = 'qux' }
     obj.traits = { 'cursor' }
-    obj.on_complete = function() end
+    obj.phase = 'running'
+    obj.committed = { cursor = { 3, 0 }, tick = 7 }
 
     pool.release(obj)
     local obj2 = pool.acquire()
@@ -81,7 +82,8 @@ describe('engine/pool', function()
     assert.is_nil(obj2.context)
     assert.is_nil(obj2.result)
     assert.is_nil(obj2.traits)
-    assert.is_nil(obj2.on_complete)
+    assert.is_nil(obj2.phase)
+    assert.is_nil(obj2.committed)
   end)
 
   it('pool respects max size', function()

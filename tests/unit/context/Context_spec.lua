@@ -218,6 +218,34 @@ describe('context/Context', function()
     assert.is_true(success)
   end)
 
+  it('restore_start() returns the window to the view captured at creation', function()
+    mocks.set_cursor(3, 2)
+    mocks.set_topline(2)
+    local ctx = Context.new(1, 1000)
+    mocks.set_cursor(5, 0)
+    mocks.set_topline(4)
+
+    local success = ctx:restore_start()
+
+    assert.is_true(success)
+    assert.equals(mocks.get_cursor()[1], 3)
+    assert.equals(mocks.get_cursor()[2], 2)
+    assert.equals(mocks.get_fn_state().topline, 2)
+  end)
+
+  it('restore_start() leaves the window untouched when the context is invalid', function()
+    mocks.set_cursor(3, 2)
+    local ctx = Context.new(1, 1000)
+    mocks.set_cursor(5, 0)
+    mocks.close_window(1000)
+
+    local success, reason = ctx:restore_start()
+
+    assert.is_false(success)
+    assert.equals(reason, 'window_closed')
+    assert.equals(mocks.get_cursor()[1], 5)
+  end)
+
   it('restore_view() returns false with reason if context invalid', function()
     local ctx = Context.new(1, 1000)
     mocks.close_window(1000)

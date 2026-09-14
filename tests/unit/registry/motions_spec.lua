@@ -41,7 +41,7 @@ describe('registry/motions', function()
     motions.register({
       id = 'my_motion',
       keys = { 'k' },
-      modes = { 'n', 'v' },
+      modes = { 'n', 'x' },
       traits = { 'cursor' },
       category = 'cursor',
       calculator = function() return {} end,
@@ -51,7 +51,7 @@ describe('registry/motions', function()
     local motion = motions.get('my_motion')
     assert.equals(motion.id, 'my_motion')
     assert.table_equals(motion.keys, { 'k' })
-    assert.table_equals(motion.modes, { 'n', 'v' })
+    assert.table_equals(motion.modes, { 'n', 'x' })
     assert.table_equals(motion.traits, { 'cursor' })
     assert.equals(motion.category, 'cursor')
     assert.equals(motion.description, 'Move up')
@@ -155,7 +155,7 @@ describe('registry/motions', function()
     motions.register({
       id = 'same_id',
       keys = { 'b' },
-      modes = { 'v' },
+      modes = { 'x' },
       traits = { 'scroll' },
       category = 'scroll',
       calculator = function() return { v = 2 } end,
@@ -213,16 +213,19 @@ describe('registry/motions', function()
     assert.table_equals(result, calc_result)
   end)
 
-  it('register defaults modes to n and v', function()
-    motions.register({
-      id = 'default_modes',
-      keys = { 'x' },
-      traits = { 'cursor' },
-      category = 'cursor',
-      calculator = function() return {} end,
-    })
-
-    local motion = motions.get('default_modes')
-    assert.is_not_nil(motion.modes)
+  it('register rejects modes other than Normal and Visual', function()
+    for _, mode in ipairs({ 'v', 's', 'o', 'i' }) do
+      assert.throws(function()
+        motions.register({
+          id = 'rejected_' .. mode,
+          keys = { 'q' },
+          modes = { 'n', mode },
+          traits = { 'cursor' },
+          category = 'cursor',
+          calculator = function() return {} end,
+        })
+      end, nil, 'mode ' .. mode .. ' must be rejected')
+      assert.is_nil(motions.get('rejected_' .. mode), 'a rejected motion must not be registered')
+    end
   end)
 end)

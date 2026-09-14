@@ -31,7 +31,7 @@ describe('engine/orchestrator', function()
 
     motions.clear()
     traits.clear()
-    loop.stop_all()
+    loop.complete_all()
 
     traits.register({
       id = 'cursor',
@@ -64,13 +64,59 @@ describe('engine/orchestrator', function()
     assert.is_type(orchestrator.fallback, 'function')
   end)
 
-  it('execute starts animation for registered motion', function()
+  it('execute moves the cursor to the target before returning', function()
     local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     orchestrator.execute('test_j', { count = 2 })
 
+    assert.equals(mocks.get_cursor()[1], 3)
+  end)
+
+  it('execute queues an animation that replays from the start at SafeState', function()
+    local config = require('whisk.config')
+    config.update({ cursor = { enabled = true } })
+
+    orchestrator.execute('test_j', { count = 2 })
+    assert.equals(loop.get_active_count(), 1)
+    assert.equals(mocks.get_cursor()[1], 3)
+
+    mocks.trigger_autocmd('SafeState')
+
+    assert.equals(mocks.get_cursor()[1], 1)
     assert.is_true(loop.is_running())
+  end)
+
+  it('execute skips the animation while more input is queued', function()
+    local config = require('whisk.config')
+    config.update({ cursor = { enabled = true } })
+    mocks.set_editor_state('mS')
+
+    orchestrator.execute('test_j', { count = 2 })
+
+    assert.equals(mocks.get_cursor()[1], 3)
+    assert.equals(loop.get_active_count(), 0)
+  end)
+
+  it('execute skips the animation while a macro is replaying', function()
+    local config = require('whisk.config')
+    config.update({ cursor = { enabled = true } })
+    mocks.set_reg_executing('q')
+
+    orchestrator.execute('test_j', { count = 2 })
+
+    assert.equals(mocks.get_cursor()[1], 3)
+    assert.equals(loop.get_active_count(), 0)
+  end)
+
+  it('execute animates when only unrelated editor state is set', function()
+    local config = require('whisk.config')
+    config.update({ cursor = { enabled = true } })
+    mocks.set_editor_state('S')
+
+    orchestrator.execute('test_j', { count = 2 })
+
+    assert.equals(loop.get_active_count(), 1)
   end)
 
   it('execute calls calculator with context', function()
@@ -96,37 +142,28 @@ describe('engine/orchestrator', function()
     assert.is_true(calculator_called)
   end)
 
-  it('execute uses fallback when category disabled', function()
+  it('execute runs the native motion when the category is disabled', function()
     local config = require('whisk.config')
     config.update({ cursor = { enabled = false } })
 
     orchestrator.execute('test_j', { count = 1, direction = 'j' })
 
-    local fed = mocks.get_api_state().fed_keys
-    assert.greater_than(#fed, 0)
-    assert.equals(fed[1].keys, 'j')
+    assert.table_equals(mocks.get_commands(), { 'normal! j' })
+    assert.equals(loop.get_active_count(), 0)
   end)
 
-  it('fallback feeds keys via feedkeys', function()
+  it('fallback runs the counted keys immediately with :normal! instead of queueing them', function()
     local motion = motions.get('test_j')
     orchestrator.fallback(motion, { count = 3, direction = 'j' })
 
-    local fed = mocks.get_api_state().fed_keys
-    assert.greater_than(#fed, 0)
-    assert.equals(fed[1].keys, '3j')
-    assert.equals(fed[1].mode, 'nx')
+    assert.table_equals(mocks.get_commands(), { 'normal! 3j' })
+    assert.equals(#mocks.get_api_state().fed_keys, 0)
   end)
 
-  it('fallback resolves control-key termcodes via feedkeys, not vim.cmd', function()
-    orchestrator.fallback({ keys = { '<C-d>' } }, { count = 1, direction = '<C-d>' })
+  it('fallback appends the find character after the motion key', function()
+    orchestrator.fallback({ keys = { 'f' } }, { count = 2, direction = 'f', char = 'x' })
 
-    local fed = mocks.get_api_state().fed_keys
-    assert.equals(#fed, 1)
-    assert.equals(fed[1].keys, '<C-d>')
-    assert.equals(fed[1].mode, 'nx')
-
-    local commands = mocks.get_commands()
-    assert.equals(#commands, 0)
+    assert.table_equals(mocks.get_commands(), { 'normal! 2fx' })
   end)
 
   it('execute handles unknown motion gracefully', function()
@@ -193,54 +230,21 @@ describe('engine/orchestrator', function()
     })
 
     orchestrator.execute('test_same', {})
-    assert.is_false(loop.is_running())
+    assert.equals(loop.get_active_count(), 0)
   end)
 
-  it('execute marks traits as animating', function()
+  it('execute finishes a running animation before computing the next motion', function()
     local config = require('whisk.config')
     config.update({ cursor = { enabled = true } })
 
     orchestrator.execute('test_j', { count = 1 })
-    assert.is_true(traits.is_animating('cursor'))
-  end)
-
-  it('clears the animating flag when the animation is cancelled for a buffer', function()
-    local config = require('whisk.config')
-    config.update({ cursor = { enabled = true } })
-
-    orchestrator.execute('test_j', { count = 1 })
-    assert.is_true(traits.is_animating('cursor'))
-
-    loop.cancel_for_buffer(1)
-    assert.is_false(traits.is_animating('cursor'))
-  end)
-
-  it('clears the animating flag when the animation is cancelled for a window', function()
-    local config = require('whisk.config')
-    config.update({ cursor = { enabled = true } })
-
-    orchestrator.execute('test_j', { count = 1 })
-    assert.is_true(traits.is_animating('cursor'))
-
-    loop.cancel_for_window(1000)
-    assert.is_false(traits.is_animating('cursor'))
-  end)
-
-  it('execute completes previous animation before starting new one (key repeat)', function()
-    local config = require('whisk.config')
-    config.update({ cursor = { enabled = true } })
-
-    orchestrator.execute('test_j', { count = 1 })
-    assert.is_true(loop.is_running())
-
-    local cursor_after_first = mocks.get_cursor()
-    assert.equals(cursor_after_first[1], 1)
+    mocks.trigger_autocmd('SafeState')
+    assert.equals(mocks.get_cursor()[1], 1)
 
     orchestrator.execute('test_j', { count = 1 })
 
-    local cursor_after_second = mocks.get_cursor()
-    assert.equals(cursor_after_second[1], 2)
-    assert.is_true(loop.is_running())
+    assert.equals(mocks.get_cursor()[1], 3)
+    assert.equals(loop.get_active_count(), 1)
   end)
 
   it('execute detects change in viewport', function()
@@ -259,7 +263,7 @@ describe('engine/orchestrator', function()
     })
 
     orchestrator.execute('test_view_detect', {})
-    assert.is_true(loop.is_running())
+    assert.equals(loop.get_active_count(), 1)
   end)
 
   it('execute does not start loop when cursor and viewport unchanged', function()
@@ -281,6 +285,6 @@ describe('engine/orchestrator', function()
     })
 
     orchestrator.execute('test_view_unchanged', {})
-    assert.is_false(loop.is_running())
+    assert.equals(loop.get_active_count(), 0)
   end)
 end)

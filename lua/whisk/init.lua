@@ -11,6 +11,11 @@ local M = {}
 local initialized = false
 
 function M.setup(user_config)
+  if vim.fn.has("nvim-0.10") == 0 then
+    vim.notify("whisk.nvim requires Neovim 0.10 or newer", vim.log.levels.ERROR)
+    return
+  end
+
   if initialized then
     M.reset()
   end
@@ -31,13 +36,16 @@ end
 
 function M.reset()
   keymaps.clear()
-  loop.stop_all()
+  local landed, landing_error = pcall(loop.complete_all)
   traits.clear()
   motions.clear()
   lifecycle.teardown()
   local performance = require("whisk.performance")
   performance.teardown()
   initialized = false
+  if not landed then
+    error(landing_error, 0)
+  end
 end
 
 function M.enable()
