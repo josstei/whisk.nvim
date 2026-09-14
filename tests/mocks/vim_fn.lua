@@ -7,6 +7,9 @@ local state = {
   visual_end = { 0, 1, 1, 0 },
   search_pattern = '',
   last_char = '',
+  editor_state = '',
+  reg_executing = '',
+  features = { ['nvim-0.10'] = 1 },
 }
 
 function M.reset()
@@ -17,7 +20,22 @@ function M.reset()
     visual_end = { 0, 1, 1, 0 },
     search_pattern = '',
     last_char = '',
+    editor_state = '',
+    reg_executing = '',
+    features = { ['nvim-0.10'] = 1 },
   }
+end
+
+function M.set_editor_state(value)
+  state.editor_state = value
+end
+
+function M.set_reg_executing(value)
+  state.reg_executing = value
+end
+
+function M.set_feature(feature, value)
+  state.features[feature] = value
 end
 
 function M.get_state()
@@ -107,6 +125,31 @@ function M.create()
       if view.topline then
         state.topline = view.topline
       end
+      if view.lnum then
+        local api = get_api_state()
+        api.cursor = { view.lnum, view.col or api.cursor[2] }
+      end
+    end,
+
+    state = function(what)
+      if not what then
+        return state.editor_state
+      end
+      local present = {}
+      for char in state.editor_state:gmatch('.') do
+        if what:find(char, 1, true) then
+          table.insert(present, char)
+        end
+      end
+      return table.concat(present)
+    end,
+
+    reg_executing = function()
+      return state.reg_executing
+    end,
+
+    has = function(feature)
+      return state.features[feature] or 0
     end,
 
     winsaveview = function()

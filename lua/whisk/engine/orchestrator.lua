@@ -20,6 +20,16 @@ local function is_same_viewport(context, result)
   return context.viewport.topline == result.viewport.topline
 end
 
+local function apply_final_result(motion, context, result)
+  for _, trait_id in ipairs(motion.traits) do
+    traits.apply_frame(trait_id, context, result, 1.0)
+  end
+end
+
+local function should_skip_animation()
+  return vim.fn.reg_executing() ~= "" or vim.fn.state("m") ~= ""
+end
+
 function M.execute(motion_id, input)
   local motion = motions.get(motion_id)
   if not motion then
@@ -32,16 +42,7 @@ function M.execute(motion_id, input)
     return
   end
 
-  local dominated = false
-  for _, trait_id in ipairs(motion.traits) do
-    if traits.is_animating(trait_id) then
-      dominated = true
-    end
-  end
-
-  if dominated then
-    loop.complete_all()
-  end
+  loop.complete_all()
 
   local context = context_builder.build(input)
   local result = motion.calculator(context)
@@ -54,14 +55,10 @@ function M.execute(motion_id, input)
     return
   end
 
-  for _, trait_id in ipairs(motion.traits) do
-    traits.set_animating(trait_id, true)
-  end
+  apply_final_result(motion, context, result)
 
-  local function clear_animating()
-    for _, trait_id in ipairs(motion.traits) do
-      traits.set_animating(trait_id, false)
-    end
+  if should_skip_animation() then
+    return
   end
 
   loop.start({
@@ -70,8 +67,6 @@ function M.execute(motion_id, input)
     traits = motion.traits,
     duration = category_config.duration,
     easing = category_config.easing,
-    on_complete = clear_animating,
-    on_cancel = clear_animating,
   })
 end
 

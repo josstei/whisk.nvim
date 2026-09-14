@@ -11,6 +11,7 @@ function Context.new(bufnr, winid)
     cursor = vim.api.nvim_win_get_cursor(self.winid),
     topline = vim.fn.getwininfo(self.winid)[1].topline,
     line_count = vim.api.nvim_buf_line_count(self.bufnr),
+    view = vim.api.nvim_win_call(self.winid, vim.fn.winsaveview),
   }
 
   return self
@@ -69,6 +70,19 @@ function Context:set_cursor(line, col)
 
   local clamped_line, clamped_col = self:clamp_position(line, col)
   vim.api.nvim_win_set_cursor(self.winid, { clamped_line, clamped_col })
+  return true
+end
+
+function Context:restore_start()
+  local valid, reason = self:is_valid()
+  if not valid then
+    return false, reason
+  end
+
+  local view = self.start.view
+  vim.api.nvim_win_call(self.winid, function()
+    vim.fn.winrestview(view)
+  end)
   return true
 end
 

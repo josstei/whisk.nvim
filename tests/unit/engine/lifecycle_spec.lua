@@ -83,6 +83,28 @@ describe('engine/lifecycle', function()
     assert.is_true(found)
   end)
 
+  it('leaving a buffer lands its running animation on the committed position', function()
+    mocks.set_buffer_content({ 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10' })
+    mocks.set_cursor(1, 0)
+    local traits = require('whisk.registry.traits')
+    traits.clear()
+    require('whisk.registry.builtin').register_traits()
+    local loop = require('whisk.engine.loop')
+    local context = require('whisk.context.builder').build({})
+    local result = { cursor = { line = 10, col = 0 } }
+    traits.apply_frame('cursor', context, result, 1.0)
+    loop.start({ context = context, result = result, traits = { 'cursor' }, duration = 1000, easing = 'linear' })
+    mocks.trigger_autocmd('SafeState')
+    mocks.execute_deferred(1)
+    assert.is_true(mocks.get_cursor()[1] < 10)
+
+    lifecycle.setup()
+    mocks.trigger_autocmd('BufLeave', { buf = 1 })
+
+    assert.equals(mocks.get_cursor()[1], 10)
+    assert.equals(loop.get_active_count(), 0)
+  end)
+
   it('teardown() removes autocmds', function()
     lifecycle.setup()
     lifecycle.teardown()

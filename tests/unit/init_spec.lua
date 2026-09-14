@@ -172,6 +172,32 @@ describe('init (main module)', function()
     end)
   end)
 
+  it('reset lands a running animation on its committed position', function()
+    mocks.set_buffer_content({ 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10' })
+    whisk.setup({})
+    require('whisk.engine.orchestrator').execute('basic_j', { count = 5, direction = 'j' })
+    mocks.trigger_autocmd('SafeState')
+    assert.equals(mocks.get_cursor()[1], 1)
+
+    whisk.reset()
+
+    assert.equals(mocks.get_cursor()[1], 6)
+    assert.equals(require('whisk.engine.loop').get_active_count(), 0)
+  end)
+
+  it('setup refuses to install on Neovim older than 0.10', function()
+    mocks.set_feature('nvim-0.10', 0)
+
+    whisk.setup({})
+
+    local notifications = mocks.get_notifications()
+    assert.equals(#notifications, 1)
+    assert.equals(notifications[1].level, vim.log.levels.ERROR)
+    assert.matches(notifications[1].msg, '0%.10')
+    assert.is_nil(next(mocks.get_keymaps()), 'no keymaps may be installed')
+    assert.is_false(require('whisk.engine.lifecycle').is_active())
+  end)
+
   it('setup applies user config', function()
     whisk.setup({
       cursor = { duration = 999 },

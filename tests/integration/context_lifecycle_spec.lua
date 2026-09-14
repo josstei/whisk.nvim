@@ -8,6 +8,21 @@ describe('Integration: Context + Lifecycle', function()
   local whisk
   local loop
   local builder
+  local traits
+
+  local function commit_and_start(target_line, duration)
+    local ctx = builder.build({})
+    local result = { cursor = { line = target_line, col = 0 } }
+    traits.apply_frame('cursor', ctx, result, 1.0)
+    loop.start({
+      context = ctx,
+      result = result,
+      traits = { 'cursor' },
+      duration = duration,
+      easing = 'linear',
+    })
+    return ctx
+  end
 
   before_each(function()
     mocks.setup()
@@ -23,69 +38,37 @@ describe('Integration: Context + Lifecycle', function()
     whisk = require('whisk')
     loop = require('whisk.engine.loop')
     builder = require('whisk.context.builder')
+    traits = require('whisk.registry.traits')
 
     whisk.setup({})
   end)
 
-  it('animation completes successfully with valid context', function()
-    local ctx = builder.build({})
-    local completed = false
-
-    loop.start({
-      context = ctx,
-      result = { cursor = { line = 5, col = 0 } },
-      traits = { 'cursor' },
-      duration = 10,
-      easing = 'linear',
-      on_complete = function()
-        completed = true
-      end,
-    })
+  it('a replayed animation completes on the committed position', function()
+    commit_and_start(5, 10)
+    mocks.trigger_autocmd('SafeState')
 
     for _ = 1, 10 do
       loop.force_process_frame()
     end
 
-    assert.is_true(completed)
+    assert.equals(mocks.get_cursor()[1], 5)
+    assert.equals(loop.get_active_count(), 0)
   end)
 
-  it('animation cancels when buffer is deleted mid-animation', function()
-    local ctx = builder.build({})
-    local cancelled = false
-    local cancel_reason = nil
-
-    loop.start({
-      context = ctx,
-      result = { cursor = { line = 5, col = 0 } },
-      traits = { 'cursor' },
-      duration = 100,
-      easing = 'linear',
-      on_cancel = function(reason)
-        cancelled = true
-        cancel_reason = reason
-      end,
-    })
-
+  it('an animation is dropped when its buffer is deleted mid-animation', function()
+    local ctx = commit_and_start(5, 1000)
+    mocks.trigger_autocmd('SafeState')
     assert.equals(loop.get_active_count(), 1)
 
     mocks.delete_buffer(ctx.bufnr)
     loop.force_process_frame()
 
-    assert.is_true(cancelled)
-    assert.equals(cancel_reason, 'buffer_deleted')
     assert.equals(loop.get_active_count(), 0)
   end)
 
-  it('cursor is clamped when buffer shrinks during animation', function()
-    local ctx = builder.build({})
-
-    loop.start({
-      context = ctx,
-      result = { cursor = { line = 10, col = 0 } },
-      traits = { 'cursor' },
-      duration = 10,
-      easing = 'linear',
-    })
+  it('the cursor is clamped when the buffer shrinks during an animation', function()
+    commit_and_start(10, 10)
+    mocks.trigger_autocmd('SafeState')
 
     mocks.set_buffer_content({ "line 1", "line 2", "line 3" })
 
@@ -93,7 +76,6 @@ describe('Integration: Context + Lifecycle', function()
       loop.force_process_frame()
     end
 
-    local cursor = mocks.get_cursor()
-    assert.equals(cursor[1], 3)
+    assert.equals(mocks.get_cursor()[1], 3)
   end)
 end)

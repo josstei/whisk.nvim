@@ -8,6 +8,7 @@ local state = {
   deferred_calls = {},
   scheduled_calls = {},
   hrtime_value = 0,
+  on_key_listeners = {},
 }
 
 function M.reset()
@@ -19,7 +20,12 @@ function M.reset()
     deferred_calls = {},
     scheduled_calls = {},
     hrtime_value = 0,
+    on_key_listeners = {},
   }
+end
+
+function M.get_on_key_listeners()
+  return state.on_key_listeners
 end
 
 function M.get_state()
@@ -83,6 +89,15 @@ M.defer_fn = function(fn, delay)
     fn = fn,
     delay = delay,
   })
+end
+
+M.on_key = function(fn, ns_id)
+  if fn == nil then
+    state.on_key_listeners[ns_id] = nil
+  else
+    state.on_key_listeners[ns_id] = fn
+  end
+  return ns_id
 end
 
 M.keymap = {
