@@ -134,7 +134,7 @@ describe("a trait that fails while landing", function()
     end, 900, "the replay never passed through an intermediate line")
     vim.g.whisk_spec_fail_landing = true
     harness.input("k")
-    harness.sleep(50)
+    harness.settle()
     vim.g.whisk_spec_fail_landing = false
     assert.equals(vim.fn.line("."), 499)
     assert.is_true(vim.fn.execute("messages"):find("spec trait failed while landing", 1, true) ~= nil,

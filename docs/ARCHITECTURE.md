@@ -218,7 +218,7 @@ Each frame tick:
 1. Records frame time via `performance.record_frame_time()`.
 2. Drops running animations whose context is no longer valid, without writing.
 3. Computes `progress = elapsed / duration`, clamped to `[0, 1]` (a zero duration completes immediately), applies easing, lerps cursor line/col and viewport topline, and calls `traits.apply_frame()` for each trait.
-4. At `progress >= 1.0`, lands the animation (applies the committed result through the traits, then restores the landing view) and removes it. Landing errors are reported the same way as listener errors.
+4. At `progress >= 1.0`, lands the animation (applies the committed result through the traits, then restores the landing view) and removes it. If a trait fails while applying a frame, the animation lands immediately instead. Trait errors from frames and landings are reported the same way as listener errors.
 5. Reschedules while any animation is running. Ticks go through a single pending-tick guard, so finishing and restarting animations never stacks a second timer chain.
 
 Every termination path (`complete_all`, `complete_for_buffer`, `complete_for_window`) lands running animations whose context is still valid and drops pending ones, which already sit at their target. If a trait fails while landing, the remaining animations still land and the first error is raised afterwards; `init.reset()` finishes its teardown before re-raising it.

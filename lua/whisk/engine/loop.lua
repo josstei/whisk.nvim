@@ -157,8 +157,16 @@ local function run_frame()
           end
           discard(i)
         else
-          apply_frame(anim, progress)
-          running = true
+          local ok, err = pcall(apply_frame, anim, progress)
+          if ok then
+            running = true
+          else
+            if not first_error then
+              first_error = err
+            end
+            pcall(land, anim)
+            discard(i)
+          end
         end
       end
     end

@@ -235,6 +235,32 @@ describe('engine/loop', function()
     assert.equals(loop.get_active_count(), 0)
   end)
 
+  it('a trait failing on an intermediate frame lands the replay and reports the error', function()
+    traits.register({
+      id = 'fails_mid_frame',
+      apply = function(_, _, progress)
+        if progress > 0 and progress < 1 then
+          error('frame exploded')
+        end
+      end,
+    })
+    commit_and_start(20, 1000, { 'cursor', 'fails_mid_frame' })
+    mocks.trigger_autocmd('SafeState')
+    assert.equals(mocks.get_cursor()[1], 1)
+
+    assert.does_not_throw(function()
+      mocks.execute_deferred(1)
+    end)
+
+    assert.equals(mocks.get_cursor()[1], 20)
+    assert.equals(loop.get_active_count(), 0)
+    assert.equals(count_pairs(mocks.get_on_key_listeners()), 0)
+    mocks.run_scheduled()
+    local notifications = mocks.get_notifications()
+    assert.equals(#notifications, 1)
+    assert.matches(notifications[1].msg, 'frame exploded')
+  end)
+
   it('a frame already scheduled before complete_all is reused instead of starting a second chain', function()
     commit_and_start(20, 1000)
     mocks.trigger_autocmd('SafeState')
