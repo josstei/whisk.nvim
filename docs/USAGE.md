@@ -14,9 +14,12 @@ Use your preferred plugin manager. The plugin auto-calls `require("whisk").setup
 {
   "josstei/whisk.nvim",
   event = "VeryLazy",
+  init = function() vim.g.whisk_auto_setup = 0 end,
   opts = {},
 }
 ```
+
+The `init` hook turns off the built-in auto-setup so `opts` is the only call to `setup()`.
 
 ### vim-plug
 

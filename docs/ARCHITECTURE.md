@@ -156,7 +156,7 @@ Dashed lines indicate lazy `require()` calls (deferred to function call time rat
 `orchestrator.execute(motion_id, input)` performs:
 
 1. Look up the motion definition from `motions.get(motion_id)`.
-2. Check category config (`cursor` or `scroll`) is enabled. If disabled, call `fallback()`, which feeds `[count]<key>[char]` with `nvim_feedkeys(..., "nx")` (count is only prepended when greater than 1).
+2. Check category config (`cursor` or `scroll`) is enabled. If disabled, call `fallback()`, which runs `[count]<key>[char]` immediately with `:normal!` (count is only prepended when greater than 1), so keys already queued behind the motion still run after it.
 3. Call `loop.complete_all()`, so every queued animation ends at its target before the new context is built.
 4. Build a context snapshot via `context.builder.build(input)`.
 5. Run the calculator. Exit early if there is no result, or if the result leaves both the cursor position and the viewport topline unchanged.
@@ -206,11 +206,11 @@ Constructed via `Context.new(bufnr, winid)`. Captures buffer and window state at
 The loop owns queued animations. Each one is committed before it is queued, and moves through two phases:
 
 - **pending**: waiting for `SafeState`. `start()` records the committed cursor and the buffer's `changedtick`.
-- **running**: being replayed. At `SafeState`, which Neovim fires when nothing is pending and before it redraws, a pending animation whose cursor and `changedtick` still match the commit is rewound with `context:restore_start()` and starts running; otherwise it is dropped. Because the rewind happens before the redraw, the first painted frame shows the start position, never the target.
+- **running**: being replayed. At `SafeState`, which Neovim fires when nothing is pending and before it redraws, a pending animation whose cursor and `changedtick` still match the commit records the current window view as its landing view, is rewound with `context:restore_start()`, and starts running; otherwise it is dropped. The landing view already includes Neovim's own adjustments (such as `'scrolloff'`) and any view change made after the commit, so landing on it reproduces the committed state exactly. Because the rewind happens before the redraw, the first painted frame shows the start position, never the target.
 
 Two hooks exist only while the queue is non-empty and are released when it empties:
 
-- A `vim.on_key` listener that calls `complete_all()`, so every key (typed, replayed from a register, or fed) acts on the committed target. Errors are reported with `vim.notify` rather than raised, because Neovim removes an `on_key` listener that errors or returns a value.
+- A `vim.on_key` listener that calls `complete_all()`, so every key (typed, replayed from a register, or fed) acts on the committed target. Errors are reported through `vim.schedule` and `vim.notify` rather than raised: Neovim removes an `on_key` listener that errors or returns a value, and a message shown inside the listener can wait for input and swallow the key that interrupted the replay.
 - A `SafeState` autocmd (`once = true`) that starts pending animations.
 
 Each frame tick:
@@ -218,10 +218,10 @@ Each frame tick:
 1. Records frame time via `performance.record_frame_time()`.
 2. Drops running animations whose context is no longer valid, without writing.
 3. Computes `progress = elapsed / duration`, clamped to `[0, 1]` (a zero duration completes immediately), applies easing, lerps cursor line/col and viewport topline, and calls `traits.apply_frame()` for each trait.
-4. At `progress >= 1.0`, applies the committed result and removes the animation.
+4. At `progress >= 1.0`, lands the animation (applies the committed result through the traits, then restores the landing view) and removes it. Landing errors are reported the same way as listener errors.
 5. Reschedules while any animation is running. Ticks go through a single pending-tick guard, so finishing and restarting animations never stacks a second timer chain.
 
-Every termination path (`complete_all`, `complete_for_buffer`, `complete_for_window`) applies the committed result to running animations whose context is still valid and drops pending ones, which already sit at their target.
+Every termination path (`complete_all`, `complete_for_buffer`, `complete_for_window`) lands running animations whose context is still valid and drops pending ones, which already sit at their target. If a trait fails while landing, the remaining animations still land and the first error is raised afterwards; `init.reset()` finishes its teardown before re-raising it.
 
 Frame interval is determined by `performance.get_frame_interval()`: 16ms (~60fps) normally, 33ms (~30fps) when both performance mode is active and `reduce_frame_rate` is enabled. Durations are converted from milliseconds to nanoseconds internally (`duration * 1000000`) for use with `vim.loop.hrtime()`.
 
@@ -332,4 +332,4 @@ Note: `frame_rate_threshold` is defined in defaults (`60`) but is not currently 
 whisk.nvim has two dependency-free test tiers:
 
 - **Unit** (`tests/`, run with `bash scripts/run_tests.sh`): plain Lua against a mocked `vim` table (`tests/mocks/`). Fast and hermetic; it covers wiring, config, the registries, and the engine's state machine, with `SafeState`, `vim.on_key`, and timers driven by the mocks. It cannot reproduce Neovim's input loop.
-- **Integration** (`tests/nvim/`, run with `bash scripts/run_nvim_tests.sh`): real headless Neovim (`nvim --headless --clean -u tests/nvim/init.lua`). `tests/nvim/harness.lua` runs each test as a coroutine inside Neovim's main loop: `input(keys)` sends keys through `nvim_input` and resumes after Neovim has processed them (and fired `SafeState`), while `sleep` and `wait_until` poll with timers. `vim.wait` is not used, because it never reaches `SafeState`. Specs are discovered by glob from `tests/nvim/specs/`. Set `NVIM=/path/to/nvim` to run against another binary.
+- **Integration** (`tests/nvim/`, run with `bash scripts/run_nvim_tests.sh`): real headless Neovim (`nvim --headless --clean -u tests/nvim/init.lua`). `tests/nvim/harness.lua` runs each test as a coroutine inside Neovim's main loop: `input(keys)` sends keys through `nvim_input` and resumes after Neovim has processed them (and fired `SafeState`), while `sleep` and `wait_until` poll with timers. `vim.wait` is not used, because it never reaches `SafeState`. Specs are discovered by glob from `tests/nvim/specs/`. Set `NVIM=/path/to/nvim` to run against another binary. A spec must leave Neovim idle after each `input()` (no pending operator, prefix key, or `getcharstr()` wait); a run that stops responding is killed after `WHISK_NVIM_TEST_TIMEOUT` seconds (default 300) and reported as a failure.
