@@ -85,6 +85,11 @@ M.defer_fn = function(fn, delay)
   })
 end
 
+M.on_key = function(fn, namespace)
+  state.input_callbacks = state.input_callbacks or {}
+  state.input_callbacks[namespace] = fn
+end
+
 M.keymap = {
   set = function(mode, lhs, rhs, opts)
     local modes = type(mode) == 'table' and mode or { mode }

@@ -65,6 +65,7 @@ end
 
 function M.create()
   return {
+    nvim_create_namespace = function() return 1 end,
     nvim_win_get_height = function(winid)
       return state.window_height
     end,

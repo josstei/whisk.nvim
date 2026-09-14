@@ -16,6 +16,7 @@ function M.setup()
     notify = vim_core.notify,
     schedule = vim_core.schedule,
     defer_fn = vim_core.defer_fn,
+    on_key = vim_core.on_key,
     keymap = vim_core.keymap,
     deepcopy = vim_core.deepcopy,
     tbl_deep_extend = vim_core.tbl_deep_extend,

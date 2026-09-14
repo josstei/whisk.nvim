@@ -267,6 +267,35 @@ describe('engine/loop', function()
     assert.equals(loop.get_active_count(), 0)
   end)
 
+  it('complete_all cancels invalid contexts without applying a frame', function()
+    local cancelled, applied = 0, 0
+    require('whisk.registry.traits').register({ id = 'test', apply = function() applied = applied + 1 end })
+    loop.start({
+      duration = 150, traits = { 'test' },
+      context = { is_valid = function() return false, 'buffer_changed' end }, result = {},
+      on_complete = function() error('invalid animation completed') end,
+      on_cancel = function(reason)
+        assert.equals(reason, 'buffer_changed')
+        cancelled = cancelled + 1
+      end,
+    })
+    loop.complete_all()
+    mocks.execute_deferred(1)
+    assert.equals(cancelled, 1)
+    assert.equals(applied, 0)
+  end)
+
+  it('a stale timer cannot process a replacement animation', function()
+    local options = { duration = 1000, traits = {}, context = {}, result = {} }
+    loop.start(options)
+    loop.complete_all()
+    loop.start(options)
+    local scheduled = #mocks.get_deferred_calls()
+    mocks.execute_deferred(1)
+    assert.equals(#mocks.get_deferred_calls(), scheduled)
+    assert.equals(loop.get_active_count(), 1)
+  end)
+
   it('complete_all processes all queued animations', function()
     local call_count = 0
 

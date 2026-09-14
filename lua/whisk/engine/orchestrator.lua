@@ -58,17 +58,19 @@ function M.execute(motion_id, input)
     traits.set_animating(trait_id, true)
   end
 
+  local function finished()
+    for _, trait_id in ipairs(motion.traits) do
+      traits.set_animating(trait_id, false)
+    end
+  end
   loop.start({
     context = context,
     result = result,
     traits = motion.traits,
     duration = category_config.duration,
     easing = category_config.easing,
-    on_complete = function()
-      for _, trait_id in ipairs(motion.traits) do
-        traits.set_animating(trait_id, false)
-      end
-    end,
+    on_complete = finished,
+    on_cancel = finished,
   })
 end
 

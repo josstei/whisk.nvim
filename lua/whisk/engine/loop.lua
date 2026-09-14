@@ -6,6 +6,7 @@ local M = {}
 
 local frame_queue = {}
 local is_running = false
+local generation = 0
 
 local easing_functions = {
   linear = function(t) return t end,
@@ -39,7 +40,8 @@ local function interpolate_result(context, result, progress)
   return interpolated
 end
 
-local function process_frame()
+local function process_frame(expected_generation)
+  if expected_generation ~= generation then return end
   local current_time = vim.loop.hrtime()
   performance.record_frame_time()
 
@@ -80,7 +82,7 @@ local function process_frame()
   end
 
   if #frame_queue > 0 then
-    vim.defer_fn(process_frame, performance.get_frame_interval())
+    vim.defer_fn(function() process_frame(expected_generation) end, performance.get_frame_interval())
   else
     is_running = false
   end
@@ -105,32 +107,43 @@ function M.start(options)
 
   if not is_running then
     is_running = true
-    vim.defer_fn(process_frame, performance.get_frame_interval())
+    generation = generation + 1
+    local expected_generation = generation
+    vim.defer_fn(function() process_frame(expected_generation) end, performance.get_frame_interval())
   end
 end
 
 function M.stop_all()
-  for _, anim in ipairs(frame_queue) do
+  local pending = frame_queue
+  frame_queue = {}
+  generation = generation + 1
+  is_running = false
+  for _, anim in ipairs(pending) do
+    if anim.on_cancel then anim.on_cancel('stopped') end
     pool.release(anim)
   end
-  frame_queue = {}
-  is_running = false
 end
 
 function M.complete_all()
-  for _, anim in ipairs(frame_queue) do
-    local eased_final = anim.easing_fn(1.0)
-    local final = interpolate_result(anim.context, anim.result, eased_final)
-    for _, trait_id in ipairs(anim.traits) do
-      traits.apply_frame(trait_id, anim.context, final, eased_final)
-    end
-    if anim.on_complete then
-      anim.on_complete()
+  local pending = frame_queue
+  frame_queue = {}
+  generation = generation + 1
+  is_running = false
+  for _, anim in ipairs(pending) do
+    local valid, reason = true, nil
+    if anim.context.is_valid then valid, reason = anim.context:is_valid() end
+    if valid then
+      local eased_final = anim.easing_fn(1.0)
+      local final = interpolate_result(anim.context, anim.result, eased_final)
+      for _, trait_id in ipairs(anim.traits) do
+        traits.apply_frame(trait_id, anim.context, final, eased_final)
+      end
+      if anim.on_complete then anim.on_complete() end
+    elseif anim.on_cancel then
+      anim.on_cancel(reason)
     end
     pool.release(anim)
   end
-  frame_queue = {}
-  is_running = false
 end
 
 function M.cancel_for_buffer(bufnr)
@@ -147,6 +160,7 @@ function M.cancel_for_buffer(bufnr)
 
   if #frame_queue == 0 then
     is_running = false
+    generation = generation + 1
   end
 end
 
@@ -164,6 +178,7 @@ function M.cancel_for_window(winid)
 
   if #frame_queue == 0 then
     is_running = false
+    generation = generation + 1
   end
 end
 
@@ -177,7 +192,7 @@ end
 
 function M.force_process_frame()
   if #frame_queue > 0 then
-    process_frame()
+    process_frame(generation)
   end
 end
 
